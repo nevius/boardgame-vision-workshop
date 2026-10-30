@@ -81,7 +81,7 @@ function inkShare(image, paper) {
 // TODO 1: return 'X' or 'O' for a cell with ink in it (null if unsure). Lesson: workshop/learn/tictactoe.md#todo-1
 /** @param {Frame} cell @param {number} paper */
 function readMark(cell, paper) {
-  return null;
+  return 'O';
 }
 
 // TODO 2: return the best move for the player to move, or null. Lesson: workshop/learn/tictactoe.md#todo-2
