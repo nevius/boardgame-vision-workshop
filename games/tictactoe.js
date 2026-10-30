@@ -90,7 +90,7 @@ function readMark(cell, paper) {
  * @returns {TicTacToeMove}
  */
 export function solve(state) {
-  return null;
+  return {row: 1, col: 1, player: 'X'};
 }
 
 // Draws the cut grid (cyan), each read mark small ('?' = not read) and the suggested move big (yellow).
