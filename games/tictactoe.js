@@ -81,7 +81,31 @@ function inkShare(image, paper) {
 // TODO 1: return 'X' or 'O' for a cell with ink in it (null if unsure). Lesson: workshop/learn/tictactoe.md#todo-1
 /** @param {Frame} cell @param {number} paper */
 function readMark(cell, paper) {
+
+  let checkWidth = cell.width / 5;
+
+
+  let checkPixels = checkWidth * checkWidth;
+  let inkPixels = 0
+  
+  const startX = Math.round(cell.width * 2 / 5);   // the middle fifth
+const endX   = Math.round(cell.width * 3 / 5);
+
+for (let y = startX; y < endX; y++) {
+  for (let x = startX; x < endX; x++) {
+    if (isInk(cell, x, y, paper)) {
+      inkPixels++;
+    }
+  }
+}
+
+let inkRatio = inkPixels / checkPixels;
+  
+if (inkRatio > 0.2) {
+  return 'X';
+} else {
   return 'O';
+}
 }
 
 // TODO 2: return the best move for the player to move, or null. Lesson: workshop/learn/tictactoe.md#todo-2
