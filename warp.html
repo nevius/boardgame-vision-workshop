@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>board-vision: find and straighten</title>
+  <meta name="description" content="Debug: find the board in a photo and straighten it, step by step.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <link rel="stylesheet" href="style.css">
+  <!-- Same import map as index.html (keep the versions equal). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs",
+      "@techstark/opencv-js": "https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.12.0-release.1/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="warp-debug.js"></script>
+</head>
+<body class="plain">
+  <header>
+    <h1>Debug: find and straighten</h1>
+    <a href="./">Open the app</a>
+  </header>
+  <main>
+    <div class="controls">
+      <label>Look for
+        <select id="mode"><option value="board">one board</option><option value="cards">many cards</option></select>
+      </label>
+      <button id="camera-button" type="button">Start camera</button>
+      <label class="button">Load photo <input id="photo-input" type="file" accept="image/*" hidden></label>
+      <button id="test-button" type="button">Test pictures</button>
+      <button id="tap-button" type="button">Tap corners</button>
+      <button id="clear-button" type="button" hidden>Forget tapped corners</button>
+    </div>
+    <p id="status">Loading OpenCV.js…</p>
+    <video id="camera" muted playsinline></video>
+    <!-- Green/yellow: the shapes found. Below: each shape straightened. -->
+    <canvas id="view" width="640" height="480"></canvas>
+    <div id="straight" class="straight"></div>
+  </main>
+</body>
+</html>

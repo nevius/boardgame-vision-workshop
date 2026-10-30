@@ -1,0 +1,19 @@
+{
+  // Type check for plain JavaScript (JSDoc). Nothing is compiled: "noEmit". Run: pnpm typecheck
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["*.js", "engine/**/*.js", "games/**/*.js", "ui/**/*.js", "tests/**/*.js", "replay/**/*.js", "scripts/**/*.js", "solutions/**/*.js"]
+}

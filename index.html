@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" class="h-full overflow-hidden overscroll-none">
+<head>
+  <meta charset="utf-8">
+  <!-- Same colour as the top bar (neutral-900): the phone's status bar area matches it. -->
+  <meta name="theme-color" content="#171717">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>board-vision</title>
+  <meta name="description" content="The app: point the camera at a board, read the game, see a suggested move.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- Installed on an iPhone: the page starts below the clock ("black"). With "black-translucent" the page reached
+       under the clock and iOS blurred the top bar there (owner, 30.10.). -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <link rel="stylesheet" href="style.css">
+  <!-- Libraries come from a CDN, pinned to exact versions. Nothing to install.
+       Preact + htm draw the page. OpenCV.js and MediaPipe are only loaded when the engine needs them
+       (see engine/libs.js). Keep the versions equal to package.json (there they only give editor hints). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "preact": "https://cdn.jsdelivr.net/npm/preact@10.29.8/dist/preact.module.js",
+      "preact/hooks": "https://cdn.jsdelivr.net/npm/preact@10.29.8/hooks/dist/hooks.module.js",
+      "htm": "https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.module.js",
+      "htm/preact": "https://cdn.jsdelivr.net/npm/htm@3.1.1/preact/index.module.js",
+      "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs",
+      "@techstark/opencv-js": "https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.12.0-release.1/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="app.js"></script>
+</head>
+<body class="h-full overflow-hidden overscroll-none bg-neutral-950">
+  <!-- ui/App.js draws the page in here. -->
+  <div id="app"></div>
+</body>
+</html>

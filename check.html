@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>board-vision: device check</title>
+  <meta name="description" content="Device check: tests the browser and downloads the libraries once, before the workshop.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <link rel="stylesheet" href="style.css">
+  <!-- Same import map as index.html (keep the versions equal), so the cache is filled for the workshop. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs",
+      "@techstark/opencv-js": "https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.12.0-release.1/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="check.js"></script>
+</head>
+<body class="plain">
+  <header>
+    <h1>board-vision: device check</h1>
+    <a href="./">Open the app</a>
+    <a href="workshop/facilitator.md">Workshop guide</a>
+  </header>
+  <main>
+    <p>Open this page on your phone <em>and</em> your laptop during setup. It checks your browser and downloads
+      everything once, so the app starts quickly afterwards. Allow the camera when asked.</p>
+    <p id="summary">Checking…</p>
+    <ul id="checks" class="checks"></ul>
+    <div class="controls">
+      <button id="again-button" type="button">Check again</button>
+      <button id="copy-button" type="button" disabled>Copy result</button>
+      <button id="clear-button" type="button">Clear cache</button>
+      <button id="reload-button" type="button">Reload</button>
+    </div>
+    <pre id="result" hidden></pre>
+  </main>
+</body>
+</html>

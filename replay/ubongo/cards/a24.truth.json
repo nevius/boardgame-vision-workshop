@@ -1,0 +1,11 @@
+{
+ "type":"A",
+ "print":".#..,####,##..|###,###,#..",
+ "grid":[".#..","####","##.."],
+ "pieces":{
+  "1–2":["green2","green4","red2"],
+  "3–4":["green2","red2","yellow2"],
+  "5–7":["blue4","yellow1","yellow4"],
+  "8–10":["green1","green2","yellow1"]
+ }
+}

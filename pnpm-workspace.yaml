@@ -1,0 +1,27 @@
+# pnpm settings for the dev tools (the page itself never installs anything).
+# Safe versions policy: see docs/DEPENDENCIES.md.
+
+# `pnpm add` writes exact versions (1.2.3, never ^1.2.3).
+savePrefix: ''
+
+# Do not install a package version that is younger than 7 days (in minutes).
+# Gives the registry time to pull hijacked releases before they reach us.
+minimumReleaseAge: 10080
+# Exceptions, exact versions only. Remove each line once the version is older than 7 days.
+minimumReleaseAgeExclude:
+  # Must equal the import map in index.html (released 2026-10-14). Remove after 2026-10-21.
+  - '@mediapipe/tasks-vision@1.1.1'
+
+# Packages that may run install scripts. Empty: none of our tools needs one.
+onlyBuiltDependencies: []
+# Install scripts we have checked and turned off on purpose (no warning on install).
+ignoredBuiltDependencies:
+  # From @tailwindcss/cli (file watcher). Its script only compiles from source when no prebuilt
+  # binary fits; the prebuilt one comes as @parcel/watcher-<os>-<cpu>, so the watcher works without it.
+  - '@parcel/watcher'
+
+# overrides: add one only when an upstream fix exists but is not picked up yet,
+# with one comment line saying which advisory it fixes.
+overrides:
+  # GHSA-vfj7-8cjw-p6xm (braces, high): 2.6.0 drops micromatch/braces; @tailwindcss/cli 4.3.3 still pins 2.5.1.
+  '@parcel/watcher': 2.6.0

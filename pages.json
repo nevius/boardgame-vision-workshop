@@ -1,0 +1,122 @@
+{
+  "pages": [
+    {
+      "path": "index.html",
+      "title": "The app",
+      "category": "Play",
+      "about": "The app: point the camera at a board, read the game, see a suggested move."
+    },
+    {
+      "path": "check.html",
+      "title": "Device check",
+      "category": "Workshop",
+      "about": "Device check: tests the browser and downloads the libraries once, before the workshop."
+    },
+    {
+      "path": "print.html",
+      "title": "Print sheets",
+      "category": "Workshop",
+      "about": "A4 sheets to print: the Sudoku and Tic-Tac-Toe sheets the app reads."
+    },
+    {
+      "path": "workshop/index.html",
+      "title": "Demo launcher",
+      "category": "Workshop",
+      "about": "Demo launcher: one tap per live demo, a pre-flight check, QR codes and a plan B list."
+    },
+    {
+      "path": "workshop/slides.html",
+      "title": "Workshop intro",
+      "category": "Workshop",
+      "about": "Intro slides for the workshop: how recognition works, no training."
+    },
+    {
+      "path": "workshop/announcement.md",
+      "title": "Ankündigung",
+      "category": "Workshop",
+      "about": "The workshop announcement text (German), for the facilitator."
+    },
+    {
+      "path": "workshop/building-blocks.md",
+      "title": "Building blocks and \"how it works\": notes for the 15-minute talk",
+      "category": "Workshop",
+      "about": "Talk notes for the intro slides."
+    },
+    {
+      "path": "workshop/facilitator.md",
+      "title": "Facilitator guide",
+      "category": "Workshop",
+      "about": "How to run the 2.5 h workshop: timing, demo script, setup."
+    },
+    {
+      "path": "workshop/game-checklist.md",
+      "title": "Which game fits?",
+      "category": "Workshop",
+      "about": "A checklist: does a board game fit the app?"
+    },
+    {
+      "path": "workshop/learn/set.md",
+      "title": "Track 2: build more",
+      "category": "Workshop",
+      "about": "You build the card reader and the solver of games/set.js in seven small steps: read a card's colour, its …"
+    },
+    {
+      "path": "workshop/learn/tictactoe.md",
+      "title": "Track 1: fill the gaps",
+      "category": "Workshop",
+      "about": "You finish two TODOs in games/tictactoe.js: read X or O from a picture, then pick the best move."
+    },
+    {
+      "path": "workshop/tasks.md",
+      "title": "Mini tasks: one building block at a time",
+      "category": "Workshop",
+      "about": "Short tasks to see how the computer vision and the small AI models work in the browser, before (or instead …"
+    },
+    {
+      "path": "tiles.html",
+      "title": "Tiles and references",
+      "category": "Debug",
+      "about": "Debug: cut a board into tiles and compare them with the reference images."
+    },
+    {
+      "path": "ubongo-pieces.html",
+      "title": "Check the Ubongo pieces",
+      "category": "Debug",
+      "about": "Debug: each of the 16 Ubongo pieces as the game knows it, next to a photo, to tick off."
+    },
+    {
+      "path": "warp.html",
+      "title": "Find and straighten",
+      "category": "Debug",
+      "about": "Debug: find the board in a photo and straighten it, step by step."
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "title": "Architecture",
+      "category": "Docs",
+      "about": "How board-vision is built, in pictures."
+    },
+    {
+      "path": "engine/README.md",
+      "title": "Engine building blocks",
+      "category": "Docs",
+      "about": "Ready-made parts to build your own game from."
+    },
+    {
+      "path": "README.md",
+      "title": "README",
+      "category": "Docs",
+      "about": "Point a phone camera at a real board game: the browser reads the game state and suggests a move."
+    }
+  ],
+  "solutions": [
+    "qwirkle",
+    "set",
+    "sudoku",
+    "tictactoe",
+    "ubongo"
+  ],
+  "cards": [
+    "A24"
+  ]
+}

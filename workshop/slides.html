@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../icons/icon-192.png">
+<title>board-vision · workshop intro</title>
+<meta name="description" content="Intro slides for the workshop: how recognition works, no training.">
+<!--
+  Slides for the first 25 minutes of the workshop: intro (issue #67) and the 15-minute "how it works" talk (issue #122). For the presenter; participants may read them too. One file, no library, works offline.
+  Step: arrow keys, space, Page Up/Down, swipe, or click (right half = next, left half = back). F = full screen.
+  D = skip the deep dives: jump to the next slide without the grey "deep dive · skip live" badge (class "deep").
+  The 15-minute talk counts only the other slides; readers find the deep dives later (issue #159).
+  One numbering (issue #178): talk parts A (how it sees), B (how it recognises), C (how it runs); slides A1, B2, …
+  data-part="…" on a slide shows the thin section header top right. Arrowhead markers use a fixed fill per colour
+  (iPhone Safari cannot colour a marker from its line).
+  The address remembers the slide: slides.html#5. Talk notes: building-blocks.md and facilitator.md.
+  Screenshots come from docs/screenshots/ (real app, headless; pipeline stages from scripts/slide-shots.js).
+  Every pre block with a data-code file name holds real lines from that file; tests/slides.test.js fails when they drift.
+  Diagrams are inline SVG (no Mermaid here).
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0a0a0a; color: #f5f5f5; overflow: hidden;
+    font: 400 clamp(15px, 2.4vmin + 0.4vw, 30px)/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  /* The footer bar has its own strip (--bar) at the bottom, so it never covers a slide. */
+  html { --bar: calc(1.4rem + env(safe-area-inset-bottom)); }
+  .slide { position: absolute; inset: 0 0 var(--bar); display: none; flex-direction: column; justify-content: safe center;
+    padding: 4vmin 6vw 2vmin; gap: 2.5vmin; overflow: auto; }
+  /* Thin section header, top right: data-part="B · Recognition". */
+  .slide[data-part]::before { content: attr(data-part); position: absolute; top: 1.2vmin; right: 4vw;
+    font-size: 0.55em; color: #a3a3a3; }
+  .slide.on { display: flex; }
+  h1 { font-size: 2.6em; line-height: 1.1; margin: 0; }
+  h2 { font-size: 1.7em; line-height: 1.15; margin: 0; color: #fff; }
+  p, ul, ol { margin: 0; }
+  li { margin: 0.25em 0; }
+  .muted { color: #a3a3a3; }
+  .accent { color: #38bdf8; }
+  .yellow { color: #facc15; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em;
+    background: #262626; padding: 0.05em 0.3em; border-radius: 0.25em; }
+  pre { margin: 0; background: #171717; border: 1px solid #262626; border-radius: 0.5em; padding: 0.7em 0.9em;
+    font: 0.75em/1.45 ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow: auto; }
+  .wrap { flex: 1.4 !important; }
+  .wrap pre { white-space: pre-wrap; }
+  .wrap-code pre { white-space: pre-wrap; }
+  .small-code pre { font-size: 0.56em; }
+  pre code { background: none; padding: 0; font-size: 1em; }
+  .cols { display: flex; gap: 4vw; align-items: center; }
+  .cols > * { flex: 1; min-width: 0; }
+  .shot { max-height: 70vh; max-width: 100%; border-radius: 0.6em; border: 1px solid #262626; display: block; }
+  .shots { display: flex; gap: 2vw; justify-content: center; }
+  .shots figure { margin: 0; text-align: center; font-size: 0.75em; color: #a3a3a3; }
+  .shots .shot { max-height: 62vh; margin: 0 auto 0.4em; }
+  .flow { display: flex; align-items: stretch; gap: 1.5vw; }
+  .flow > div { flex: 1; background: #171717; border: 1px solid #262626; border-radius: 0.6em; padding: 0.7em; }
+  .flow > span { align-self: center; font-size: 1.6em; color: #38bdf8; }
+  .flow > div > b:first-child { display: block; font-size: 1.1em; margin-bottom: 0.2em; }
+  .ways { display: flex; gap: 2vw; }
+  .ways > div { flex: 1; border-radius: 0.6em; padding: 0.8em; background: #171717; border-top: 0.3em solid #38bdf8; }
+  .ways > div:nth-child(2) { border-top-color: #facc15; }
+  .ways > div:nth-child(3) { border-top-color: #a3a3a3; }
+  .ways > div > b:first-child { display: block; font-size: 1.15em; margin-bottom: 0.3em; }
+  table { border-collapse: collapse; font-size: 0.8em; }
+  td, th { text-align: left; padding: 0.3em 0.8em 0.3em 0; border-bottom: 1px solid #262626; vertical-align: top; }
+  th { color: #a3a3a3; font-weight: 600; }
+  a { color: #38bdf8; }
+  .dia { width: 100%; max-height: 44vh; display: block; flex-shrink: 0; }
+  .short .dia { max-height: 30vh; }
+  .short .shots .shot { max-height: 22vh; }
+  .strip { display: flex; gap: 1vw; }
+  .strip figure { flex: 1; min-width: 0; margin: 0; text-align: center; font-size: 0.6em; color: #a3a3a3; }
+  .strip img { width: 100%; height: 30vh; object-fit: contain; border-radius: 0.4em; border: 1px solid #262626; display: block; margin-bottom: 0.3em; }
+  .src { font-size: 0.6em; color: #a3a3a3; margin-top: 0.3em; }
+  .read { font-size: 0.6em; color: #a3a3a3; }
+  .qrs { display: flex; gap: 1.5em; justify-content: center; margin-top: 0.5em; }
+  .qrs figure { margin: 0; text-align: center; font-size: 0.55em; color: #a3a3a3; }
+  .qrs img { width: 15vh; height: 15vh; display: block; margin: 0 auto 0.3em; border-radius: 0.3em; }
+  /* Slides with QR codes (live demo, three paths): content centred, buttons in one centred row,
+     the QR codes small in the bottom-right corner so they never push the screenshots down. */
+  .has-qr { padding-bottom: 6vmin; }
+  .has-qr .demos { justify-content: center; }
+  .has-qr .qrs { position: absolute; right: 3vw; bottom: 1.5vmin; margin: 0; gap: 1em; }
+  .has-qr .qrs img { width: 10vh; height: 10vh; }
+  .has-qr .qrs figure { max-width: 12vh; font-size: 0.45em; line-height: 1.2; }
+  .center { align-items: center; text-align: center; }
+  .center .shots { gap: 4vw; }
+  .center .shots .shot { max-height: 60vh; }
+  /* Agenda: one bar, block width = minutes. */
+  .timebar { display: flex; gap: 0.25vw; width: 100%; font-size: 0.6em; line-height: 1.2; }
+  .timebar > div { min-width: 0; padding: 0.7em 0.45em; border-radius: 0.4em; min-height: 22vh; overflow-wrap: anywhere; }
+  .timebar b { display: block; font-size: 1.25em; margin-bottom: 0.35em; }
+  .timebar .talk, .legend .talk { background: #0c4a6e; color: #e0f2fe; }
+  .timebar .you, .legend .you { background: #854d0e; color: #fef9c3; }
+  .timebar .build { background: #a16207; font-size: 1.3em; }
+  .timebar .pause, .legend .pause { background: #404040; color: #d4d4d4; }
+  .legend { font-size: 0.6em; color: #a3a3a3; display: flex; gap: 0.6em; align-items: center; }
+  .legend span { display: inline-block; width: 1em; height: 1em; border-radius: 0.2em; margin-left: 0.8em; }
+  .legend span:first-child { margin-left: 0; }
+  .agenda-notes { font-size: 0.85em; }
+  .demos { display: flex; flex-wrap: wrap; gap: 0.4em; margin-top: 0.6em; font-size: 0.6em; }
+  .demo { padding: 0.25em 0.7em; border: 1px solid #38bdf8; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+  .demo:hover { background: #0c4a6e; }
+  .sources li { font-size: 0.75em; }
+  .badge { align-self: flex-start; font-size: 0.55em; color: #d4d4d4; background: #404040; border-radius: 999px; padding: 0.15em 0.7em; }
+  .try { font-size: 0.7em; }
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--bar); display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4vw env(safe-area-inset-bottom); font-size: 0.65em; color: #a3a3a3; background: #0a0a0a; pointer-events: none; }
+  #progress { position: fixed; left: 0; top: 0; height: 4px; background: #0369a1; transition: width 0.2s; }
+  @media (max-aspect-ratio: 1/1) {
+    /* Portrait phone: one column, smaller screenshots. */
+    .cols, .flow, .ways { flex-direction: column; align-items: stretch; }
+    .flow > span { transform: rotate(90deg); }
+    .shot { max-height: 45vh; margin: 0 auto; }
+    .shots .shot { max-height: 40vh; }
+    .strip { flex-wrap: wrap; }
+    .strip figure { flex: 1 0 30%; }
+    .strip img { height: 18vh; }
+    .slide { justify-content: flex-start; padding-top: 7vmin; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    td, th { overflow-wrap: anywhere; }
+    h1 { font-size: 2.1em; }
+    .center .shots .shot { max-height: 34vh; }
+    .has-qr .qrs { position: static; justify-content: center; }
+    .timebar { flex-direction: column; }
+    .timebar > div { min-height: 0; flex: none !important; padding: 0.4em 0.6em; }
+    .timebar b { display: inline; margin-right: 0.6em; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<section class="slide">
+  <div class="cols">
+    <div>
+      <p class="accent">Workshop · 2.5 hours</p>
+      <h1>Point a phone at a board game. Get the next move.</h1>
+      <p class="muted" style="margin-top:1em">Everything runs in the browser on your phone. No server, no cloud AI.
+        You build one game today, with your own AI coding tool.</p>
+    </div>
+    <img class="shot" style="flex:0 1 auto" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/release-165/390-ubongo-3d.webp" alt="Ubongo on the phone: card read, solution shown in 3D">
+  </div>
+</section>
+
+<section class="slide has-qr center">
+  <h2>Live demo</h2>
+  <div class="shots">
+    <figure><img class="shot" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/release-165/390-ubongo.webp" alt="Ubongo: solution drawn on the card">Ubongo: card, roll, pieces → solution</figure>
+    <figure><img class="shot" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/release-165/390-set.webp" alt="Set: the cards of one set named and outlined in yellow">Set: a set in yellow, tap the chip for the next</figure>
+  </div>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#ubongo&solution&card=A24&camera" target="_blank" rel="noopener">▶ Ubongo live</a> <a class="demo" href="https://jannistriestocode.github.io/board-vision/#ubongo&solution&card=A24&replay" target="_blank" rel="noopener">▶ Ubongo backup</a> <a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&camera" target="_blank" rel="noopener">▶ Set live</a> <a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&replay" target="_blank" rel="noopener">▶ Set backup</a> <a class="demo" href="./" target="_blank" rel="noopener">▶ All demos</a></p>
+  <div class="qrs">
+    <figure><img src="qr/demo.svg" alt="QR code: the finished Ubongo demo">Demo on your phone</figure>
+    <figure><img src="qr/launcher.svg" alt="QR code: the demo launcher">Launcher: demos + pre-flight</figure>
+  </div>
+</section>
+
+<section class="slide" data-part="Today">
+  <h2>Today: 13:30–16:15</h2>
+  <div class="timebar" role="img" aria-label="13:30 intro and live demo 10 min, 13:40 how it works 15 min, 13:55 setup and pick a game 20 min, 14:15 break 15 min, 14:30 build 75 min, 15:45 show and tell 20 min, 16:05 benchmark and wrap-up 10 min">
+    <div class="talk" style="flex:10"><b>13:30</b>Intro + demo</div>
+    <div class="talk" style="flex:15"><b>13:40</b>How it works</div>
+    <div class="you" style="flex:20"><b>13:55</b>Setup, pick a game</div>
+    <div class="pause" style="flex:15"><b>14:15</b>Break</div>
+    <div class="you build" style="flex:75"><b>14:30</b>Build in pairs · 75 min</div>
+    <div class="you" style="flex:20"><b>15:45</b>Show and tell</div>
+    <div class="talk" style="flex:10"><b>16:05</b>Wrap-up</div>
+  </div>
+  <p class="legend"><span class="talk"></span>we talk <span class="you"></span>you build <span class="pause"></span>break</p>
+  <ul class="agenda-notes">
+    <li><b>Now, 25 min:</b> the big picture, then how it works (parts A, B, C).</li>
+    <li><b>Then you:</b> template, Pages, phone, pick a path and a game. We come round every 30 minutes.</li>
+    <li><b>15:35:</b> 10 minutes left, make what you have work on the phone. <b>16:05:</b> benchmark your phone, learnings.</li>
+  </ul>
+</section>
+
+<section class="slide" data-part="How it works">
+  <p class="accent">How it works · 15 minutes</p>
+  <h2>Camera → state (JSON) → move</h2>
+  <div class="flow">
+    <div><b><code>detect()</code></b>Looks at the picture and guesses what lies on the table. Can be wrong; that is fine.</div>
+    <span>→</span>
+    <div><b>state</b>Plain JSON. Print it, save it, test it.<pre><code>{ "cards": [
+  { "color": "red", "number": 2 } ] }</code></pre></div>
+    <span>→</span>
+    <div><b><code>solve()</code></b>Ordinary code with the rules. Same state in, same move out.</div>
+    <span>→</span>
+    <div><b><code>draw()</code></b>Paints the move on top of the picture.</div>
+  </div>
+  <p class="muted">Fuzzy only where it must be (seeing). Plain logic everywhere else.</p>
+</section>
+
+<section class="slide" data-part="How it works">
+  <h2>The pipeline: what runs where</h2>
+  <svg class="dia" viewBox="0 0 1000 300" role="img" aria-label="Camera loop, then OpenCV.js, then MediaPipe, then your game; all on WebAssembly and the GPU in the browser">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker></defs>
+    <g font-size="22" fill="#f5f5f5" text-anchor="middle">
+      <rect x="10" y="30" width="215" height="150" rx="14" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="117" y="72" fill="#38bdf8" font-size="18">C2 · camera loop</text>
+      <text x="117" y="112" font-weight="700">Camera</text>
+      <text x="117" y="146" fill="#a3a3a3" font-size="18">5 pictures / s</text>
+      <rect x="265" y="30" width="215" height="150" rx="14" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="372" y="72" fill="#38bdf8" font-size="18">A1 · OpenCV.js</text>
+      <text x="372" y="112" font-weight="700">Find + straighten</text>
+      <text x="372" y="146" fill="#a3a3a3" font-size="18">no learning</text>
+      <rect x="520" y="30" width="215" height="150" rx="14" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="627" y="72" fill="#facc15" font-size="18">A2 · MediaPipe</text>
+      <text x="627" y="112" font-weight="700">Name tiles, hands</text>
+      <text x="627" y="146" fill="#a3a3a3" font-size="18">small models</text>
+      <rect x="775" y="30" width="215" height="150" rx="14" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="882" y="72" fill="#a3a3a3" font-size="18">your game</text>
+      <text x="882" y="112" font-weight="700">JSON → move</text>
+      <text x="882" y="146" fill="#a3a3a3" font-size="18">solve(), draw()</text>
+      <path d="M227 105H261" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah)"/><path d="M482 105H516" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah)"/><path d="M737 105H771" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah)"/>
+      <rect x="10" y="215" width="980" height="64" rx="14" fill="#0c4a6e" opacity="0.6"/>
+      <text x="500" y="256">C1 · fast in the browser: WebAssembly + GPU, files cached, no server</text>
+    </g>
+  </svg>
+  <p class="muted">One level under the surface: the idea, and one real line of code each.</p>
+</section>
+
+<section class="slide" data-part="How it works">
+  <h2>The plan</h2>
+  <div class="ways">
+    <div><b>A · How it sees</b>A1 OpenCV.js: find and straighten<br>A2 MediaPipe: name tiles, see hands</div>
+    <div><b>B · How it recognises: no training</b>B1 rules<br>B2 references<br>B3 geometry + memory</div>
+    <div><b>C · How it runs</b>C1 why it is fast on a phone<br>C2 the camera loop</div>
+  </div>
+  <p class="muted">Then your toolbox, where you work, and the workshop: three paths, testing, your AI tool, when stuck. Grey "deep dive" slides are skipped live (key D).</p>
+</section>
+
+<section class="slide" data-part="A · How it sees">
+  <p class="accent">Part A · How it sees</p>
+  <h2>A1 · OpenCV.js: from photo to straight cards</h2>
+  <div class="strip">
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-camera.webp" alt="Camera picture of Set cards">camera</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-bright-patches.webp" alt="Bright patches: grey, blur, threshold">grey → blur → <b>threshold</b></figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-edges.webp" alt="Edges of the cards">edges</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-found-cards.webp" alt="Found cards with four corners each"><b>findContours</b> → 4 corners</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-straightened.webp" alt="One card, straightened"><b>warpPerspective</b></figure>
+  </div>
+  <p>OpenCV = 25 years of classic computer vision in C++, built to <b>WebAssembly</b>: the same functions, in the browser.</p>
+  <p class="read">Further reading: <a href="https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html">OpenCV.js tutorials</a></p>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&replay" target="_blank" rel="noopener">▶ Set: tap Steps</a> <a class="demo" href="../warp.html" target="_blank" rel="noopener">▶ Find and straighten</a></p>
+</section>
+
+<section class="slide small-code deep" data-part="A · How it sees">
+  <p class="badge">deep dive · skip live</p>
+  <h2>A1 · Bright patches → shapes with 4 corners</h2>
+  <div class="cols">
+    <div style="flex:2">
+      <pre data-code="engine/warp.js"><code>cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0);
+const light = new cv.Mat();
+const split = new cv.Mat();
+cv.threshold(gray, split, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
+const minPixels = minArea * gray.rows * gray.cols;
+const quads = [];
+const overlaps = (q) =&gt; quads.some((b) =&gt; pointInPolygon(center(q), b) || pointInPolygon(center(b), q));
+for (const cut of BRIGHT_CUTS) {
+  const kernel = cv.Mat.ones(cut, cut, cv.CV_8U);
+  cv.morphologyEx(split, light, cv.MORPH_OPEN, kernel);</code></pre>
+      <pre data-code="engine/warp.js"><code>const area = cv.contourArea(contour);
+if (area &gt;= minPixels) {
+  const hull = new cv.Mat();
+  const approx = new cv.Mat();
+  cv.convexHull(contour, hull);
+  cv.approxPolyDP(hull, approx, 0.04 * cv.arcLength(hull, true), true);</code></pre>
+      <p class="src"><a href="../engine/warp.js">engine/warp.js</a> · <code>findBrightQuads()</code></p>
+    </div>
+    <ul>
+      <li><b>threshold</b> (Otsu): each pixel → white or black. Cards are white.</li>
+      <li><b>findContours</b>: the outline of every white patch.</li>
+      <li><b>convexHull</b> + <b>approxPolyDP</b>: smooth the outline until 4 corners are left. A finger on the edge does not break it.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide wrap-code" data-part="A · How it sees">
+  <h2>A1 · Why 4 points are enough</h2>
+  <svg class="dia" style="max-height:24vh" viewBox="0 0 1000 330" role="img" aria-label="A tilted board with four corners mapped to a straight square">
+    <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#facc15"/></marker></defs>
+    <g fill="none" stroke="#525252" stroke-width="2">
+      <path d="M150 70L140 273M240 80L250 287M50 127L340 160M40 193L350 230"/>
+      <path d="M707 50V310M793 50V310M620 137H880M620 223H880"/>
+    </g>
+    <path d="M60 60L330 90L360 300L30 260Z" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <rect x="620" y="50" width="260" height="260" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <g stroke="#facc15" stroke-width="2.5" stroke-dasharray="8 6" fill="none" marker-end="url(#ah2)">
+      <path d="M68 58C300 0 450 20 612 48"/><path d="M338 88C450 60 520 50 868 48"/>
+      <path d="M368 302C500 330 700 330 870 316"/><path d="M38 268C250 340 450 330 612 312"/>
+    </g>
+    <g fill="#facc15"><circle cx="60" cy="60" r="8"/><circle cx="330" cy="90" r="8"/><circle cx="360" cy="300" r="8"/><circle cx="30" cy="260" r="8"/>
+      <circle cx="620" cy="50" r="8"/><circle cx="880" cy="50" r="8"/><circle cx="880" cy="310" r="8"/><circle cx="620" cy="310" r="8"/></g>
+    <g font-size="22" fill="#f5f5f5" text-anchor="middle">
+      <text x="195" y="190">tilted board</text><text x="750" y="190">straight board</text>
+      <text x="500" y="180" fill="#facc15">3×3 matrix</text><text x="500" y="208" fill="#a3a3a3" font-size="18">(homography)</text>
+    </g>
+  </svg>
+  <div>
+    <pre data-code="engine/warp.js"><code>const [tl, tr, br, bl] = orderCorners(corners);
+const src = cv.matFromImageData(frame);
+const from = cv.matFromArray(4, 1, cv.CV_32FC2, [tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y]);
+const to = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, width, 0, width, height, 0, height]);
+const matrix = cv.getPerspectiveTransform(from, to);
+const out = new cv.Mat();
+cv.warpPerspective(src, out, matrix, new cv.Size(width, height), cv.INTER_LINEAR, cv.BORDER_REPLICATE);</code></pre>
+    <p>A flat board seen at an angle: a 3×3 matrix with <b>8 unknowns</b>. Each corner gives 2 equations (x and y),
+      so <b>4 corners = 8</b>: exactly enough. <span class="src"><a href="../engine/warp.js">engine/warp.js</a> · <code>warp()</code></span></p>
+  </div>
+  <p class="read">Further reading: <a href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">OpenCV homography tutorial</a></p>
+  <p class="demos"><a class="demo" href="../warp.html" target="_blank" rel="noopener">▶ Try it: find and straighten</a></p>
+</section>
+
+<section class="slide short" data-part="A · How it sees">
+  <h2>A2 · MediaPipe Image Embedder: a picture → numbers</h2>
+  <svg class="dia" viewBox="0 0 1000 250" role="img" aria-label="A tile goes through MobileNetV3-small and becomes 1024 numbers; cosine similarity against a few reference photos picks the name">
+    <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker></defs>
+    <g font-size="20" fill="#f5f5f5" text-anchor="middle">
+      <rect x="10" y="60" width="110" height="110" rx="10" fill="#262626" stroke="#a3a3a3" stroke-width="2"/>
+      <circle cx="65" cy="115" r="32" fill="#ef4444"/>
+      <text x="65" y="205" fill="#a3a3a3" font-size="18">one tile</text>
+      <path d="M170 40L330 85V145L170 190Z" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="250" y="110" font-size="17">MobileNetV3</text><text x="250" y="134" font-size="17">-small</text>
+      <text x="250" y="225" fill="#a3a3a3" font-size="18">trained by Google</text>
+      <rect x="380" y="80" width="230" height="70" rx="10" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="495" y="122" font-family="ui-monospace, monospace" font-size="18">[0.12, −0.40, 0.07, …]</text>
+      <text x="495" y="185" fill="#a3a3a3" font-size="18">1024 numbers</text>
+      <g font-size="16" font-family="ui-monospace, monospace">
+        <rect x="680" y="20" width="160" height="44" rx="8" fill="#171717" stroke="#525252"/><text x="760" y="48">red circle 0.94</text>
+        <rect x="680" y="94" width="160" height="44" rx="8" fill="#171717" stroke="#525252"/><text x="760" y="122">red star 0.71</text>
+        <rect x="680" y="168" width="160" height="44" rx="8" fill="#171717" stroke="#525252"/><text x="760" y="196">blue circle 0.63</text>
+      </g>
+      <text x="920" y="110" fill="#facc15" font-weight="700">red</text><text x="920" y="136" fill="#facc15" font-weight="700">circle</text>
+      <path d="M125 115H166" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/><path d="M332 115H376" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/><path d="M612 115L676 42" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/><path d="M612 115H676" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/><path d="M612 115L676 190" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/><path d="M842 42L880 105" stroke="#38bdf8" stroke-width="2.5" fill="none" marker-end="url(#ah3)"/>
+    </g>
+  </svg>
+  <div class="shots">
+    <figure><img class="shot" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/sudoku-tiles.webp" alt="Sudoku board cut into cells">cells</figure>
+    <figure><img class="shot" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/sudoku-scores.webp" alt="Best reference score per cell">scores</figure>
+  </div>
+  <p class="muted">Few-shot: about 3 reference photos per name, no training (<code>classify</code>, try it on <code>tiles.html</code>). The Sudoku cells above are scored the same way with own numbers (<code>matchTile</code>). <span class="read">Further reading:
+    <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/image_embedder/web_js">Image Embedder (web)</a> ·
+    <a href="https://arxiv.org/abs/1905.02244">MobileNetV3 paper</a></span></p>
+</section>
+
+<section class="slide deep" data-part="A · How it sees">
+  <p class="badge">deep dive · skip live</p>
+  <h2>A2 · Similar pictures point the same way</h2>
+  <div class="cols">
+    <svg class="dia" viewBox="0 0 420 300" role="img" aria-label="Two arrows with a small angle between them: cosine near 1">
+      <defs><marker id="ah4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker>
+        <marker id="ah4y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#facc15"/></marker>
+        <marker id="ah4g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a3a3a3"/></marker></defs>
+      <path d="M40 260L380 120" stroke="#38bdf8" stroke-width="5" marker-end="url(#ah4b)"/>
+      <path d="M40 260L360 60" stroke="#facc15" stroke-width="5" marker-end="url(#ah4y)"/>
+      <path d="M40 260L200 280" stroke="#a3a3a3" stroke-width="4" stroke-dasharray="8 6" marker-end="url(#ah4g)"/>
+      <path d="M190 199A160 160 0 0 0 175 175" stroke="#f5f5f5" stroke-width="2" fill="none"/>
+      <g font-size="20" fill="#f5f5f5"><text x="250" y="190" fill="#38bdf8">this tile</text><text x="230" y="60" fill="#facc15">red circle</text>
+        <text x="210" y="290" fill="#a3a3a3">blue star</text><text x="205" y="225">small angle</text></g>
+    </svg>
+    <div>
+      <pre data-code="engine/fewshot.js"><code>export function cosine(a, b) {
+  let dot = 0;
+  let aa = 0;
+  let bb = 0;
+  for (let i = 0; i &lt; a.length; i++) {
+    dot += a[i] * b[i];
+    aa += a[i] * a[i];
+    bb += b[i] * b[i];
+  }
+  return aa &amp;&amp; bb ? dot / Math.sqrt(aa * bb) : 0;</code></pre>
+      <p class="src"><a href="../engine/fewshot.js">engine/fewshot.js</a> · <code>cosine()</code>: 1 = same direction, 0 = unrelated</p>
+    </div>
+  </div>
+  <p class="muted">The top 3 references vote (k = 3). A new name = 3 photos on <code>tiles.html</code>.</p>
+  <p class="demos"><a class="demo" href="../tiles.html" target="_blank" rel="noopener">▶ Tiles and their best matches</a></p>
+</section>
+
+<section class="slide" data-part="A · How it sees">
+  <h2>A2 · Hand Landmarker: hand gone = move done</h2>
+  <svg class="dia" viewBox="0 0 1000 360" role="img" aria-label="Palm detector finds the hand, 21 keypoints follow; when no hand is seen for 800 ms, detect runs once">
+    <rect x="70" y="80" width="250" height="270" rx="10" fill="none" stroke="#facc15" stroke-width="3" stroke-dasharray="10 6"/>
+    <g stroke="#38bdf8" stroke-width="4" fill="none" stroke-linejoin="round">
+      <path d="M200 330L150 290L115 255L95 220L80 190"/>
+      <path d="M200 330L175 230L170 180L167 145L165 115"/>
+      <path d="M200 330L205 225L205 170L205 132L205 100"/>
+      <path d="M200 330L235 232L240 182L243 148L245 120"/>
+      <path d="M200 330L262 248L272 210L278 185L283 162"/>
+      <path d="M175 230L205 225L235 232L262 248"/>
+    </g>
+    <g fill="#f5f5f5">
+      <circle cx="200" cy="330" r="7"/>
+      <circle cx="150" cy="290" r="6"/><circle cx="115" cy="255" r="6"/><circle cx="95" cy="220" r="6"/><circle cx="80" cy="190" r="6"/>
+      <circle cx="175" cy="230" r="6"/><circle cx="170" cy="180" r="6"/><circle cx="167" cy="145" r="6"/><circle cx="165" cy="115" r="6"/>
+      <circle cx="205" cy="225" r="6"/><circle cx="205" cy="170" r="6"/><circle cx="205" cy="132" r="6"/><circle cx="205" cy="100" r="6"/>
+      <circle cx="235" cy="232" r="6"/><circle cx="240" cy="182" r="6"/><circle cx="243" cy="148" r="6"/><circle cx="245" cy="120" r="6"/>
+      <circle cx="262" cy="248" r="6"/><circle cx="272" cy="210" r="6"/><circle cx="278" cy="185" r="6"/><circle cx="283" cy="162" r="6"/>
+    </g>
+    <g font-size="21" fill="#f5f5f5">
+      <text x="70" y="60" fill="#facc15">palm detector: a box</text>
+      <text x="340" y="150" fill="#38bdf8">then 21 keypoints</text>
+      <text x="340" y="180" fill="#a3a3a3" font-size="18">(wrist + 4 per finger)</text>
+      <text x="520" y="245">the page only asks: hand or no hand?</text>
+    </g>
+    <g font-size="18" fill="#f5f5f5" text-anchor="middle">
+      <rect x="520" y="270" width="200" height="40" rx="8" fill="#7f1d1d"/><text x="620" y="296">hand: wait</text>
+      <rect x="725" y="270" width="140" height="40" rx="8" fill="#262626"/><text x="795" y="296">gone 800 ms</text>
+      <rect x="870" y="270" width="120" height="40" rx="8" fill="#14532d"/><text x="930" y="296">detect()</text>
+    </g>
+  </svg>
+  <p class="muted">A half-done move is never read. 10 checks per second. <a href="../engine/hands.js">engine/hands.js</a>
+    <span class="read">· Further reading: <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js">Hand Landmarker (web)</a> ·
+    <a href="https://arxiv.org/abs/2006.10214">MediaPipe Hands paper</a></span></p>
+  <ol class="try">
+    <li>Empty sheet in view → the chip suggests where X plays.</li>
+    <li>Hand over the sheet → 21 points, chip <code>Hand over board · paused</code>.</li>
+    <li>Write the X, pull the hand away → <code>Move done · reading</code> → the next suggestion.</li>
+    <li>Wiggle the fingers, show two hands: the points follow every joint.</li>
+  </ol>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#tictactoe&solution&hands=show&camera" target="_blank" rel="noopener">▶ Hands live (Tic-Tac-Toe sheet)</a></p>
+</section>
+
+<section class="slide" data-part="B · Recognition">
+  <p class="accent">Part B · How it recognises: no training</p>
+  <h2>No training here: three techniques</h2>
+  <svg class="dia" style="max-height:30vh" viewBox="0 0 1000 230" role="img" aria-label="Three techniques: hand-written rules on pixels (Set), compare with references (Sudoku), geometry and memory (Ubongo). None of them is trained.">
+    <g font-size="21" fill="#f5f5f5" text-anchor="middle">
+      <rect x="10" y="10" width="310" height="160" rx="14" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="165" y="50" fill="#38bdf8" font-size="18">B1 · rules on pixels</text>
+      <text x="165" y="90" font-weight="700">measure, then if / else</text>
+      <text x="165" y="125" fill="#a3a3a3" font-size="18">hue 352° → red</text>
+      <text x="165" y="152" fill="#a3a3a3" font-size="18">example: Set</text>
+      <rect x="345" y="10" width="310" height="160" rx="14" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="500" y="50" fill="#facc15" font-size="18">B2 · compare with references</text>
+      <text x="500" y="90" font-weight="700">closest reference wins</text>
+      <text x="500" y="125" fill="#a3a3a3" font-size="18">cell ≈ "7" 0.91, "1" 0.74</text>
+      <text x="500" y="152" fill="#a3a3a3" font-size="18">example: Sudoku digits</text>
+      <rect x="680" y="10" width="310" height="160" rx="14" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="835" y="50" fill="#a3a3a3" font-size="18">B3 · geometry + memory</text>
+      <text x="835" y="90" font-weight="700">shape → lookup</text>
+      <text x="835" y="125" fill="#a3a3a3" font-size="18">fingerprint → known card</text>
+      <text x="835" y="152" fill="#a3a3a3" font-size="18">example: Ubongo</text>
+      <text x="500" y="215" fill="#f5f5f5">Nothing learns from data. Something new = a new rule or a new reference.</text>
+    </g>
+  </svg>
+  <div class="shots">
+    <figure><img class="shot" style="max-height:24vh" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-straightened.webp" alt="One Set card, straightened">Set card: count, hue, ink, shape</figure>
+    <figure><img class="shot" style="max-height:24vh" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/sudoku-scores.webp" alt="Sudoku cells and their best reference scores">Sudoku cells: score per reference</figure>
+    <figure><img class="shot" style="max-height:24vh" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/ubongo-straightened.webp" alt="Ubongo card, straightened">Ubongo card: the shape of its fields</figure>
+  </div>
+</section>
+
+<section class="slide" data-part="B · Recognition">
+  <h2>B1 · Rules: Set reads four numbers per card</h2>
+  <div class="strip">
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-camera.webp" alt="Camera picture of Set cards">camera</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-found-cards.webp" alt="Found cards">cards found</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-straightened.webp" alt="One card, straightened">one card, straight</figure>
+    <figure><img src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/set-overlay.webp" alt="Every card named">named</figure>
+  </div>
+  <table>
+    <tr><th>Feature</th><th>What is measured</th><th>Rule</th></tr>
+    <tr><td>number</td><td>ink outlines on the card</td><td>count = 1, 2 or 3</td></tr>
+    <tr><td>colour</td><td>hue of the ink, after the card paper is made white</td><td>60–200° green, 200–330° purple, else red</td></tr>
+    <tr><td>fill</td><td>ink inside the symbol ÷ ink on its outline</td><td>&gt; 0.85 solid; paper hole empty; else striped</td></tr>
+    <tr><td>shape</td><td>how much of its box (and its hull) a symbol fills</td><td>dents → squiggle; &lt; 0.7 diamond; else oval</td></tr>
+  </table>
+  <p class="muted">Plain if / else on measured numbers. Steps view, stage <code>rules</code>: every card with its numbers.</p>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&replay&steps=rules" target="_blank" rel="noopener">▶ Set: the rules on a photo</a></p>
+</section>
+
+<section class="slide deep" data-part="B · Recognition">
+  <p class="badge">deep dive · skip live</p>
+  <h2>B1 · The Set rules in code</h2>
+  <div class="cols">
+    <div class="wrap">
+      <pre data-code="solutions/set.js"><code>const area = cv.contourArea(contour);
+const hull = new cv.Mat();
+cv.convexHull(contour, hull);
+const solidity = area / Math.max(1, cv.contourArea(hull));
+hull.delete();
+const rect = cv.minAreaRect(contour);
+const boxFill = area / Math.max(1, rect.size.width * rect.size.height);
+const shape = solidity &lt; SQUIGGLE_SOLIDITY ? 'squiggle'
+  : boxFill &lt; DIAMOND_BOX_FILL || boxFill &gt; RECTANGLE_BOX_FILL ? 'diamond' : 'oval';</code></pre>
+      <pre data-code="solutions/set.js"><code>export function colorOfHue(h) {
+  if (h &gt;= 60 &amp;&amp; h &lt; 200) return 'green';
+  if (h &gt;= 200 &amp;&amp; h &lt; 330) return 'purple';
+  return 'red';
+}</code></pre>
+      <p class="src"><code>solutions/set.js</code> · <code>readShape()</code>, <code>colorOfHue()</code></p>
+    </div>
+    <ul>
+      <li><b>White balance first:</b> each pixel ÷ the card's paper colour. Yellow lamp or shade, the paper is white again.</li>
+      <li><b>Ink</b> = how far the darkest channel is below white; Otsu splits ink from paper.</li>
+      <li><b>Solidity</b> = area ÷ convex hull: a squiggle has dents. <b>Box fill</b>: a diamond fills half its box.</li>
+      <li>A wrong read is fixed by moving a threshold, not by more data. Live video: 10 frames vote (<code>steady</code>).</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide" data-part="B · Recognition">
+  <h2>B2 · References: Sudoku compares each cell</h2>
+  <div class="cols">
+    <img class="shot" style="flex:0 1 auto;max-height:52vh" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/slides/sudoku-scores.webp" alt="Sudoku cells, each with its best reference and score">
+    <ol>
+      <li>Cell → black-and-white ink mask, cut to the ink.</li>
+      <li>Shrunk to 8 × 8 = 64 numbers (<code>pixelEmbedding</code>).</li>
+      <li>Compared with every reference (cosine, 1 = same).</li>
+      <li><b>Closest wins</b> (<code>matchTile</code>). Below 0.5: empty / not sure.</li>
+    </ol>
+  </div>
+  <p class="muted">The references are digits drawn by code, a few per digit. Nothing is trained: a new digit style = a new reference.</p>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#sudoku&solution&replay&steps=scores" target="_blank" rel="noopener">▶ Sudoku: best and runner-up per cell</a></p>
+</section>
+
+<section class="slide deep" data-part="B · Recognition">
+  <p class="badge">deep dive · skip live</p>
+  <h2>B2 · Three kinds of references: which when</h2>
+  <table>
+    <tr><th>References</th><th>Numbers from</th><th>Used by</th><th>Pick it when</th></tr>
+    <tr><td>Drawn by code</td><td>own 8 × 8 mask (<code>pixelEmbedding</code> + <code>matchTile</code>)</td><td>Sudoku digits, Qwirkle shapes</td><td>the ideal looks are known; works without a camera</td></tr>
+    <tr><td>Cut from photos</td><td>silhouette + light / dark pattern (<code>engine/pictures.js</code>)</td><td>Ubongo piece pictures (<code>ubongo.refs.json</code>)</td><td>printed art you cannot draw; same print every time</td></tr>
+    <tr><td>Photos + embedder</td><td>MediaPipe Image Embedder, 1024 numbers, top-3 vote (<code>classify</code>)</td><td>offered: <code>tiles.html</code>, TODO hints in <code>games/sudoku.js</code>, <code>games/qwirkle.js</code></td><td>messy real things; 3 photos per name</td></tr>
+  </table>
+  <pre data-code="solutions/sudoku.js"><code>  const found = engine.matchTile(engine.pixelEmbedding(mask, MASK_CELLS), digitRefs, 1);
+  return found &amp;&amp; found.score &gt; 0.5 ? Number(found.label) : null;
+}
+
+const MASK_CELLS = 8;  // the mask is shrunk to 8 × 8 numbers before comparing
+let digitRefs = null;  // made on first use</code></pre>
+  <p class="src"><code>solutions/sudoku.js</code> · <code>readDigit()</code>: the cell's 64 numbers against every drawn digit (<code>digitRefs</code>, made once). The embedder is a trained model, but by Google: we only compare its numbers.</p>
+</section>
+
+<section class="slide" data-part="B · Recognition">
+  <h2>B3 · Geometry + memory: Ubongo</h2>
+  <div class="flow">
+    <div><b>Card</b>Red frame, light squares → the shape of both fields → <b>fingerprint</b>. Known in this browser? Then it is that card.</div>
+    <span>→</span>
+    <div><b>Printed pictures</b>Each cut out (silhouette + light / dark) → the closest reference cut-out → piece names.</div>
+    <span>→</span>
+    <div><b>Pieces on the table</b>Coloured blobs → a <b>catalogue</b> of cube shapes per colour → best fit.</div>
+    <span>→</span>
+    <div><b>Solver</b>Plain search: fill the field with the pieces (<code>engine/cover.js</code>).</div>
+  </div>
+  <p class="muted">No learning: shapes are compared with a list, and the browser remembers cards you confirmed (“Card looks right ✓”).</p>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#ubongo&solution&card=A24&replay&steps=fingerprint" target="_blank" rel="noopener">▶ Ubongo: fingerprint and catalogue</a></p>
+</section>
+
+<section class="slide deep" data-part="B · Recognition">
+  <p class="badge">deep dive · skip live</p>
+  <h2>B3 · The fingerprint and the catalogue</h2>
+  <div class="cols">
+    <div class="wrap">
+      <pre data-code="solutions/ubongo.js"><code>// A card's fingerprint: the shapes of its fields, e.g. ".#..,####,##..|###,###,#..". Null without two fields.
+/** @param {{ grid: string[] }[]} fields */
+export function fingerprint(fields) {
+  return fields.length === 2 ? fields.map((f) =&gt; f.grid.join(',')).join('|') : null;
+}</code></pre>
+      <p class="src"><code>solutions/ubongo.js</code> · <code>#</code> = square, <code>.</code> = none, <code>,</code> = next row, <code>|</code> = second field</p>
+    </div>
+    <ul>
+      <li><b>Memory:</b> “Card looks right ✓” saves fingerprint → card type + pieces per roll in <code>localStorage</code>. Next time the fingerprint alone names it; <code>&amp;card=A24</code> pre-confirms one.</li>
+      <li><b>Catalogue</b> (<code>engine/pieces3d.js</code>): every turn of every piece, as cubes seen from above. A blob gets the best-scoring piece of its colour, no piece twice.</li>
+      <li><b>Live video:</b> <code>anchor</code> holds a confirmed card, <code>steady</code> votes over frames.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide deep" data-part="B · Recognition">
+  <p class="badge">deep dive · skip live</p>
+  <h2>B · Make it learn something new: add a reference</h2>
+  <table>
+    <tr><th>New thing</th><th>What you do</th><th>Where</th></tr>
+    <tr><td>Tile, digit, shape</td><td>3 photos per name, tap to label</td><td><a href="../tiles.html">tiles.html</a> → <code>engine.classify</code></td></tr>
+    <tr><td>Ubongo piece picture</td><td>owner's photos → reference cut-outs</td><td><code>node scripts/ubongo-refs.js</code> → <code>games/ubongo.refs.json</code></td></tr>
+    <tr><td>Ubongo card</td><td>check it, More → “Card looks right ✓”</td><td>saved in this browser</td></tr>
+    <tr><td>Set card read wrong</td><td>look at its numbers, move one threshold</td><td>Steps → <code>rules</code>, then the constant in <code>solutions/set.js</code></td></tr>
+  </table>
+  <p class="muted">Why that is enough: the board is printed, the pieces are known, the camera only has to tell a few dozen things apart.
+    Rules and references are small, readable and fixable by hand.</p>
+</section>
+
+<section class="slide" data-part="C · How it runs">
+  <p class="accent">Part C · How it runs</p>
+  <h2>C1 · Why it is fast enough on a phone</h2>
+  <svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Page JavaScript calls OpenCV.js on WebAssembly with SIMD and MediaPipe on the GPU with a WebAssembly fallback; files come from the browser cache">
+    <defs><marker id="ah5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker></defs>
+    <g font-size="21" fill="#f5f5f5" text-anchor="middle">
+      <rect x="10" y="10" width="980" height="56" rx="12" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="500" y="46">your page: JavaScript (detect, solve, draw)</text>
+      <rect x="10" y="110" width="470" height="110" rx="12" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="245" y="150" font-weight="700">OpenCV.js → WebAssembly</text>
+      <text x="245" y="182" fill="#a3a3a3" font-size="18">near machine speed on the CPU;</text>
+      <text x="245" y="206" fill="#a3a3a3" font-size="18">SIMD: 4–16 pixels per instruction</text>
+      <rect x="520" y="110" width="470" height="110" rx="12" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="755" y="150" font-weight="700">MediaPipe → GPU (WebGL)</text>
+      <text x="755" y="182" fill="#a3a3a3" font-size="18">the model runs on the graphics chip;</text>
+      <text x="755" y="206" fill="#a3a3a3" font-size="18">no GPU? the same model on WebAssembly</text>
+      <rect x="10" y="262" width="980" height="56" rx="12" fill="#0c4a6e" opacity="0.6"/>
+      <text x="500" y="298">browser cache: ~10 MB OpenCV + 4 MB + 8 MB models, downloaded once (check.html)</text>
+      <path d="M245 68V106" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah5)"/><path d="M755 68V106" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah5)"/><path d="M245 222V258" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah5)"/><path d="M755 222V258" stroke="#38bdf8" stroke-width="3" marker-end="url(#ah5)"/>
+    </g>
+  </svg>
+  <p><b>WebGPU</b> (newer phones): a faster, more direct way to the graphics chip. Same code, the browser picks; the
+    More → Benchmark shows which one your phone uses.</p>
+  <p class="read">Further reading: <a href="https://developer.mozilla.org/en-US/docs/WebAssembly">WebAssembly (MDN)</a> ·
+    <a href="https://v8.dev/features/simd">WebAssembly SIMD</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API">WebGPU (MDN)</a></p>
+  <p class="demos"><a class="demo" href="../check.html" target="_blank" rel="noopener">▶ Device check: your phone</a></p>
+</section>
+
+<section class="slide deep" data-part="C · How it runs">
+  <p class="badge">deep dive · skip live</p>
+  <h2>C1 · GPU first, CPU if that fails</h2>
+  <div class="cols">
+    <div>
+      <pre data-code="engine/fewshot.js"><code>for (const delegate of delegates) {
+  try {
+    const embedder = await vision.ImageEmbedder.createFromOptions(fileset, {
+      baseOptions: { modelAssetBuffer: model, delegate },
+      l2Normalize: true,
+    });
+    backend = delegate;
+    recordLoad('embedder', performance.now() - start, delegate);
+    return embedder;
+  } catch (err) {
+    if (delegate === delegates.at(-1)) throw err;
+  }</code></pre>
+      <p class="src"><a href="../engine/fewshot.js">engine/fewshot.js</a> · <code>loadEmbedder()</code></p>
+    </div>
+    <table>
+      <tr><th>Step</th><th>Target</th><th>Sandbox</th></tr>
+      <tr><td>load OpenCV.js</td><td>4 s</td><td>once per visit</td></tr>
+      <tr><td>load embedder / hands</td><td>3 s</td><td>1 s / 1.5 s</td></tr>
+      <tr><td>straighten (warp)</td><td>50 ms</td><td>~10 ms</td></tr>
+      <tr><td>embed one tile</td><td>30 ms</td><td>20 tiles per run</td></tr>
+      <tr><td>detect, live</td><td>200 ms</td><td>5 × per second</td></tr>
+      <tr><td>detect, photo</td><td>1 s</td><td>400 ms (Set)</td></tr>
+    </table>
+  </div>
+  <p class="muted">Targets: <code>TARGETS</code> in <a href="../engine/bench.js">engine/bench.js</a>. Your phone: More → <b>Benchmark</b>.</p>
+</section>
+
+<section class="slide" data-part="C · How it runs">
+  <h2>C2 · The camera loop</h2>
+  <svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Camera, next video frame, rate limit, picture changed, then detect, state JSON, solve, draw, and back to the next frame">
+    <defs><marker id="ah6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38bdf8"/></marker></defs>
+    <g font-size="19" fill="#f5f5f5" text-anchor="middle">
+      <rect x="10" y="30" width="200" height="76" rx="12" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="110" y="64" font-family="ui-monospace, monospace" font-size="16">getUserMedia</text><text x="110" y="90" fill="#a3a3a3" font-size="16">camera on, once</text>
+      <rect x="260" y="30" width="220" height="76" rx="12" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="370" y="64" font-family="ui-monospace, monospace" font-size="15">requestVideoFrame-</text><text x="370" y="88" font-family="ui-monospace, monospace" font-size="15">Callback</text>
+      <rect x="530" y="30" width="200" height="76" rx="12" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="630" y="64">max 5 × / s?</text><text x="630" y="90" fill="#a3a3a3" font-size="16">rate limit</text>
+      <rect x="780" y="30" width="210" height="76" rx="12" fill="#171717" stroke="#facc15" stroke-width="2"/>
+      <text x="885" y="64">picture changed?</text><text x="885" y="90" fill="#a3a3a3" font-size="16">64×48 grey thumb</text>
+      <rect x="780" y="200" width="210" height="76" rx="12" fill="#171717" stroke="#38bdf8" stroke-width="2"/>
+      <text x="885" y="234" font-family="ui-monospace, monospace">detect()</text><text x="885" y="260" fill="#a3a3a3" font-size="16">960 px copy</text>
+      <rect x="530" y="200" width="200" height="76" rx="12" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="630" y="234">state</text><text x="630" y="260" fill="#a3a3a3" font-size="16">plain JSON</text>
+      <rect x="260" y="200" width="220" height="76" rx="12" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="370" y="244" font-family="ui-monospace, monospace">solve()</text>
+      <rect x="10" y="200" width="200" height="76" rx="12" fill="#171717" stroke="#a3a3a3" stroke-width="2"/>
+      <text x="110" y="234" font-family="ui-monospace, monospace">draw()</text><text x="110" y="260" fill="#a3a3a3" font-size="16">Canvas 2D on top</text>
+      <path d="M212 68H256" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M482 68H526" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M732 68H776" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M885 108V196" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M778 238H734" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M528 238H484" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/><path d="M258 238H214" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#ah6)"/>
+      <path d="M110 278V312H235V150H300V112" stroke="#38bdf8" stroke-width="2" stroke-dasharray="7 5" fill="none" marker-end="url(#ah6)"/>
+      <path d="M630 108V150H400V112" stroke="#facc15" stroke-width="2" stroke-dasharray="4 5" fill="none" marker-end="url(#ah6)"/><path d="M885 108C885 160 500 170 420 112" stroke="#facc15" stroke-width="2" stroke-dasharray="4 5" fill="none" marker-end="url(#ah6)"/>
+      <text x="560" y="168" fill="#facc15" font-size="16">no → keep the last answer</text>
+      <text x="250" y="306" fill="#a3a3a3" font-size="16">next frame</text>
+    </g>
+  </svg>
+  <p class="muted">The video plays smoothly by itself; detect() runs only when it is useful. The next frame waits for detect(), so a slow phone never piles up work.</p>
+  <p class="read">Further reading: <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia">getUserMedia</a> ·
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement/requestVideoFrameCallback">requestVideoFrameCallback</a> ·
+    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">Canvas API</a> (MDN)</p>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&camera" target="_blank" rel="noopener">▶ Set live: tap Steps</a></p>
+</section>
+
+<section class="slide wrap-code deep" data-part="C · How it runs">
+  <p class="badge">deep dive · skip live</p>
+  <h2>C2 · The loop in code</h2>
+  <pre data-code="app.js"><code>async function liveFrame() {
+  const now = performance.now();
+  const mode = settings();
+  if (!limiter.ready(now)) return;
+  // A 64×48 grey thumbnail says if anything moved since the last change.
+  const moving = change.update(greyThumb(grabFrame(video, THUMB.width, THUMB.height)), now);
+  if (change.still(now) &gt; IDLE_MS) return pause('Nothing changed for 2 minutes: camera off to save battery.');
+  // Searching: every frame. Found: with the hand check on, detect() only after a move; else when the picture moved.
+  // An anchored card (engine/anchor.js) is only tracked inside the game's detect(): cheap, so it may run each time.
+  if (!detectNow({ searching: searching &amp;&amp; !ui.hand, detectNext, hands: Boolean(stopHands), skip: mode.skip, moving, hasResult: Boolean(lastResult) })) return;
+  detectNext = false;</code></pre>
+  <p class="src"><a href="../app.js">app.js</a> · <code>liveFrame()</code>, one video frame</p>
+  <pre data-code="engine/speed.js"><code>export const MODES = {
+  default: { camera: { width: 1920, height: 1080 }, rate: 5, long: 960, skip: true, hands: 10 },
+  saver: { camera: { width: 1280, height: 720 }, rate: 2, long: 720, skip: true, hands: 5 },
+  full: { camera: { width: 1920, height: 1080 }, rate: Infinity, long: Infinity, skip: false, hands: 10 },
+};</code></pre>
+  <p class="src"><a href="../engine/speed.js">engine/speed.js</a> · Speed setting (More): Auto, Saver, Full. A slow phone switches to Saver by itself.</p>
+</section>
+
+<section class="slide" data-part="Your toolbox">
+  <p class="accent">From the big picture to your file</p>
+  <h2>Your toolbox: the building blocks</h2>
+  <table>
+    <tr><th>Block</th><th>What it does</th><th>Used by</th></tr>
+    <tr><td><code>findBoard</code>, <code>straighten</code>, <code>cutTiles</code></td><td>Find a board or sheet, make it straight, cut it into tiles (OpenCV.js)</td><td>Sudoku, Tic-Tac-Toe</td></tr>
+    <tr><td><code>matchTile</code> · <code>classify</code></td><td>Few-shot names: compare with references, no training. Own numbers, or the MediaPipe embedder</td><td>Sudoku, Qwirkle (own numbers); <code>classify</code>: <code>tiles.html</code>, TODO hints</td></tr>
+    <tr><td><code>cards</code> · <code>color</code></td><td>Many cards at once, cut apart, straightened; colours under any light</td><td>Set, Ubongo</td></tr>
+    <tr><td><code>fields</code> · <code>pictures</code></td><td>Squares printed on a card → grid; small printed pictures → names</td><td>Ubongo</td></tr>
+    <tr><td><code>pieces3d</code> · <code>iso</code> · <code>cover</code></td><td>3D pieces on the table → names; draw cubes in 3D; fill a shape with pieces</td><td>Ubongo</td></tr>
+    <tr><td><code>steady</code> · <code>anchor</code> · <code>pick</code></td><td>No flicker on live video; a card stays put; a tap → what is under it</td><td>Set, Ubongo, …</td></tr>
+    <tr><td><code>watchHand</code></td><td>Wait while a hand is over the board (MediaPipe Hand Landmarker)</td><td>any</td></tr>
+  </table>
+  <p class="muted">Examples and limits: <code>engine/README.md</code>. Runs as WebAssembly everywhere, faster with WebGPU.</p>
+</section>
+
+<section class="slide" data-part="Your toolbox">
+  <h2>Where you work: <code>games/&lt;game&gt;.js</code></h2>
+  <div class="cols">
+    <pre style="flex:1.6"><code>export const config = { name: 'My game' };
+
+export async function detect(frame, engine) {
+  const corners = await engine.findBoard(frame);
+  ...
+  return { grid };           // state: plain JSON
+}
+
+export function solve(state) {
+  return { row: 1, col: 2 }; // move: plain JSON
+}
+
+export function draw(ctx, state, move) { ... }</code></pre>
+    <ul>
+      <li>One file per game. The contract is explained in <code>games/_blank.js</code>.</li>
+      <li>Add its name to <code>games/list.js</code>, open the page with <code>#&lt;game&gt;</code>.</li>
+      <li><code>engine</code> is everything shared. You do not change it.</li>
+      <li>Chip text and icon buttons come from <code>engine.setInfo</code> / <code>setActions</code>, not the canvas.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="slide has-qr" data-part="Workshop">
+  <p class="accent">Workshop · your turn</p>
+  <h2>Three paths: pick by how brave you feel</h2>
+  <div class="ways">
+    <div><b>Explore</b>Open the demo on the phone. <b>Steps</b> in the bottom bar shows each stage; its <b>Knobs</b> turn the sliders.
+      <p class="muted" style="margin-top:0.5em">No code needed.</p></div>
+    <div><b>Adapt</b>Finish a starter, quickest first: Tic-Tac-Toe, Sudoku, Set, Qwirkle. The TODOs at the top of the file.
+      <p class="muted" style="margin-top:0.5em">Quickest to a working phone.</p></div>
+    <div><b>Own game</b>Bring a game, copy <code>games/_blank.js</code>, glue the blocks together.
+      <p class="muted" style="margin-top:0.5em">Checklist: <code>workshop/game-checklist.md</code>.</p></div>
+  </div>
+  <p class="demos"><a class="demo" href="https://jannistriestocode.github.io/board-vision/#set&solution&camera" target="_blank" rel="noopener">▶ Explore: demo</a> <a class="demo" href="../#tictactoe" target="_blank" rel="noopener">▶ Adapt: Tic-Tac-Toe starter</a> <a class="demo" href="../print.html" target="_blank" rel="noopener">▶ Print sheets</a></p>
+  <div class="qrs">
+    <figure><img src="qr/repo.svg" alt="QR code: the workshop repo on GitHub">Workshop repo (README: AI prompts per path)</figure>
+    <figure><img src="qr/print.svg" alt="QR code: the print sheets">Print sheets</figure>
+    <figure><img src="qr/launcher.svg" alt="QR code: the demo launcher">Launcher: plan B</figure>
+  </div>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>Test without a phone</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>More → <b>Save photo</b>, copy the photos into <code>replay/&lt;game&gt;/</code>.</li>
+        <li>On the laptop: drop photos on the page, or More → <b>Sample photos</b>.</li>
+        <li>Without a browser, for you and your AI tool:</li>
+      </ul>
+      <pre style="margin-top:0.6em"><code>pnpm install                # once
+node replay/run.js &lt;game&gt;   # one JSON line per photo</code></pre>
+      <p class="muted" style="margin-top:0.6em">Add <code>&lt;photo&gt;.truth.json</code> and it tells you <code>ok</code> or <code>differs</code>.</p>
+    </div>
+    <img class="shot" style="flex:0 1 auto" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/release-165/390-photo.webp" alt="The page with a sample photo loaded">
+  </div>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>Test on the phone</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Your repo → <b>Settings → Pages</b> → push to <code>main</code>.</li>
+        <li>Open <code>https://&lt;you&gt;.github.io/&lt;repo&gt;/#&lt;game&gt;</code> on the phone.</li>
+        <li><b>Camera</b> in the bottom bar. The camera needs HTTPS: the Pages link has it.</li>
+        <li>More opens the controls: Sample photos, speed, benchmark, log.</li>
+        <li>Odd phone? <code>check.html</code> shows what it can do.</li>
+      </ul>
+    </div>
+    <img class="shot" style="flex:0 1 auto" src="https://jannistriestocode.github.io/board-vision/docs/screenshots/release-165/390-more.webp" alt="The More sheet on the phone">
+  </div>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>Working with your AI tool</h2>
+  <ul>
+    <li>It reads <code>AGENTS.md</code> first: the rules of this repo (browser only, no build step, small files).</li>
+    <li>Ask it to read <code>engine/README.md</code> (the building blocks) before it writes detection code.</li>
+    <li>Tell it to change only <code>games/&lt;game&gt;.js</code> (and <code>games/list.js</code>).</li>
+    <li>Give it photos in <code>replay/&lt;game&gt;/</code>: it can run <code>node replay/run.js</code> itself.</li>
+  </ul>
+  <pre><code>Read AGENTS.md, games/_blank.js and engine/README.md.
+Then make games/chess.js: find the board, name each square,
+and check it with node replay/run.js chess.</code></pre>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>When you are stuck</h2>
+  <ul>
+    <li><b>Board not found:</b> better light, a plain table, More → <b>Tap corners</b>, or a print sheet (<code>print.html</code>).</li>
+    <li><b>Wrong names:</b> more reference tiles on <code>tiles.html</code> (about 3 per name).</li>
+    <li><b>Labels flicker:</b> the <code>steady</code> and <code>anchor</code> blocks, or freeze the picture (snowflake).</li>
+    <li><b>15 minutes on the same problem:</b> wave. Finished versions of every starter are on the branch <code>solutions</code>; there, add <code>&amp;solution</code> to the address.</li>
+    <li><b>Own game does not work out:</b> switch to a starter. Tic-Tac-Toe is the quickest.</li>
+  </ul>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>Today: what happens next</h2>
+  <table>
+    <tr><th>Time</th><th>What</th></tr>
+    <tr><td>13:55</td><td>Setup: <b>Use this template</b>, turn on Pages, open your link on the phone. Open <code>check.html</code> on phone and laptop. Pick a game.</td></tr>
+    <tr><td>14:15</td><td>Break (15 min)</td></tr>
+    <tr><td>14:30</td><td><b>Build</b> in pairs (75 min). We come round every 30 minutes.</td></tr>
+    <tr><td>15:35</td><td>10 minutes left: make what you have work on the phone.</td></tr>
+    <tr><td>15:45</td><td>Show and tell: 1–2 minutes per pair, on the phone.</td></tr>
+    <tr><td>16:05</td><td>Benchmark: More → <b>Benchmark</b>: compare “Your phone: good / ok / slow”. Learnings, wrap-up. End 16:15.</td></tr>
+  </table>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <p class="accent">Go</p>
+  <h1>Use this template → Pages on → open it on your phone.</h1>
+  <p class="muted">Steps are in the README of the repo. Then pick your way in and start your AI tool.</p>
+</section>
+
+<section class="slide" data-part="Workshop">
+  <h2>Further reading</h2>
+  <p class="muted">Not needed today. For later, if you want to know more.</p>
+  <ul class="sources">
+    <li><b>OpenCV.js:</b> <a href="https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html">tutorials</a> ·
+      <a href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">homography</a></li>
+    <li><b>MediaPipe (web):</b> <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/image_embedder/web_js">Image Embedder</a> ·
+      <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js">Hand Landmarker</a></li>
+    <li><b>Papers:</b> <a href="https://arxiv.org/abs/1905.02244">MobileNetV3</a> · <a href="https://arxiv.org/abs/2006.10214">MediaPipe Hands</a></li>
+    <li><b>Speed:</b> <a href="https://developer.mozilla.org/en-US/docs/WebAssembly">WebAssembly</a> ·
+      <a href="https://v8.dev/features/simd">WebAssembly SIMD</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API">WebGPU</a></li>
+    <li><b>Camera loop:</b> <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia">getUserMedia</a> ·
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement/requestVideoFrameCallback">requestVideoFrameCallback</a> ·
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">Canvas API</a></li>
+    <li><b>This repo:</b> <a href="../engine/README.md">engine/README.md</a> · <a href="../docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a> ·
+      <a href="./">demo launcher</a></li>
+  </ul>
+</section>
+
+<div id="bar"><span>board-vision</span><span id="count"></span></div>
+
+<script>
+// @ts-check
+// Step through the slides. The slide number lives in the address (#1, #2, …) so a reload stays put.
+const slides = [...document.querySelectorAll('.slide')];
+const count = /** @type {HTMLElement} */ (document.getElementById('count'));
+const progress = /** @type {HTMLElement} */ (document.getElementById('progress'));
+let at = 0;
+
+/** @param {number} n */
+function show(n) {
+  at = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, i) => s.classList.toggle('on', i === at));
+  count.textContent = `${at + 1} / ${slides.length}`;
+  progress.style.width = `${((at + 1) / slides.length) * 100}%`;
+  history.replaceState(null, '', `#${at + 1}`);
+}
+
+/** The next slide after `n` that is not a deep dive (or the last one). @param {number} n */
+function nextCore(n) {
+  let i = n + 1;
+  while (i < slides.length - 1 && slides[i].classList.contains('deep')) i++;
+  return i;
+}
+
+addEventListener('keydown', (e) => {
+  if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); show(at + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(at - 1); }
+  else if (e.key === 'Home') show(0);
+  else if (e.key === 'End') show(slides.length - 1);
+  else if (e.key === 'd' || e.key === 'D') show(nextCore(at));
+  else if (e.key === 'f' || e.key === 'F') {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen?.();
+  }
+});
+
+// Click or tap: right part = next, left third = back. Links and selected text are left alone.
+addEventListener('click', (e) => {
+  if (/** @type {HTMLElement} */ (e.target).closest('a') || String(getSelection())) return;
+  show(e.clientX < innerWidth / 3 ? at - 1 : at + 1);
+});
+
+// Swipe left = next, swipe right = back.
+let startX = 0, startY = 0;
+addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - startX, dy = e.changedTouches[0].clientY - startY;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); show(dx < 0 ? at + 1 : at - 1); }
+});
+
+addEventListener('hashchange', () => show(parseInt(location.hash.slice(1), 10) - 1 || 0));
+show(parseInt(location.hash.slice(1), 10) - 1 || 0);
+</script>
+</body>
+</html>

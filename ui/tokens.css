@@ -1,0 +1,24 @@
+/* The design tokens (issue #163): the one place for colours, sizes and corners. Every page uses them:
+   the app (Tailwind names like bg-accent, rounded-ui, min-h-tap, built into style.css by tailwind.css),
+   and the plain pages (check, debug, print, launcher) through these var(--bv-…) names.
+   Rule: no new colours or sizes in a page; add a token here first. Spacing is the 8-pt grid (Tailwind 2 = 8 px). */
+:root {
+  --bv-accent: #0369a1;     /* one accent: active buttons, the suggested move, links (white text on it: 5.9:1, AA) */
+  --bv-accent-strong: #075985; /* an accent button while pressed */
+  --bv-accent-text: #38bdf8;
+  --bv-ok: #059669;         /* found, good check */
+  --bv-warn: #f59e0b;       /* searching, solution badge */
+  --bv-error: #dc2626;      /* failed (bars, borders) */
+  --bv-error-text: #f87171; /* failed, as text on the dark background (AA contrast; #dc2626 is only 4.1:1) */
+  --bv-bg: #0a0a0a;         /* behind the picture */
+  --bv-surface: #171717;    /* bars, sheet, list rows */
+  --bv-surface-2: #262626;  /* a button on a surface */
+  --bv-text: #f5f5f5;
+  --bv-muted: #a3a3a3;
+  --bv-line: rgb(255 255 255 / 0.12); /* the one border style: 1px solid var(--bv-line) */
+  --bv-radius: 0.75rem;     /* one corner radius (chips are round) */
+  --bv-tap: 3rem;           /* one button size: 48 px */
+  --bv-text-sm: 0.75rem;    /* three text sizes */
+  --bv-text-md: 0.875rem;
+  --bv-text-lg: 1.125rem;
+}

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>board-vision: print sheets</title>
+  <meta name="description" content="A4 sheets to print: the Sudoku and Tic-Tac-Toe sheets the app reads.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="stylesheet" href="ui/tokens.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <!-- Print sheets for the paper games (games/sudoku.js, games/tictactoe.js). Two A4 pages, few boards per page
+       to save paper and ink. The black frame lets the camera find the board (engine.findBoard with
+       darkFrame: true). Only the proportions matter, not the size: the frame is 2.5 % of the board's side and the
+       cells fill the inside (viewBox 0 0 180 180). -->
+  <style>
+    @page { size: A4 portrait; margin: 0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; color: #000; background: var(--bv-bg); } /* screen: the design tokens (ui/tokens.css); paper: black on white */
+    .note { max-width: 210mm; margin: 0 auto; padding: 1rem; color: var(--bv-text); font-size: var(--bv-text-md); }
+    .note a { color: var(--bv-accent-text); }
+    .page { position: relative; width: 210mm; height: 297mm; margin: 0 auto 1rem; background: #fff; overflow: hidden; }
+    .page h1 { position: absolute; left: 20mm; top: 8mm; margin: 0; font-size: 6mm; }
+    .page p { position: absolute; left: 20mm; width: 170mm; margin: 0; font-size: 3.2mm; color: #444; }
+    .page h1 + p { top: 15mm; }
+    .page .foot { top: 287mm; }
+    .board { position: absolute; }
+    /* On a phone the A4 pages shrink to fit the screen (issue #147); printing still uses the real size. */
+    @media screen and (max-width: 820px) { .page { zoom: 0.45; } }
+    @media print {
+      body { background: #fff; }
+      .note { display: none; }
+      .page { margin: 0; break-after: page; }
+    }
+  </style>
+</head>
+<body>
+  <p class="note">Print on A4 at <b>100 % / actual size</b> (not "fit to page"), no margins needed. Page 1: Sudoku puzzle
+    and an empty Sudoku (write your own puzzle). Page 2: six Tic-Tac-Toe boards. <a href="./">Back to the app</a></p>
+  <section class="page">
+    <h1>Sudoku</h1>
+    <p>Open board-vision with #sudoku. Top: a puzzle. Bottom: write your own. One clear digit per cell.</p>
+<svg class="board" style="left:42.5mm;top:22mm;width:125mm;height:125mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="23.50" y1="4.50" x2="23.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="23.50" x2="175.50" y2="23.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="42.50" y1="4.50" x2="42.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="42.50" x2="175.50" y2="42.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="80.50" y1="4.50" x2="80.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="80.50" x2="175.50" y2="80.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="99.50" y1="4.50" x2="99.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="99.50" x2="175.50" y2="99.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="137.50" y1="4.50" x2="137.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="137.50" x2="175.50" y2="137.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="156.50" y1="4.50" x2="156.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="156.50" x2="175.50" y2="156.50" stroke="#000" stroke-width="0.5"/>
+      <polyline points="17.42,8.87 11.49,8.87 10.81,13.43 15.14,12.86 17.42,15.14 16.85,17.99 14.00,19.13 10.58,18.33"/>
+      <polyline points="29.58,9.21 36.42,9.21 32.43,13.09 35.51,14.23 36.42,16.85 34.14,19.13 29.58,18.56"/>
+      <polyline points="86.01,8.87 93.99,8.87 88.86,19.13"/>
+      <polyline points="16.51,27.87 12.63,30.72 10.81,34.71"/>
+      <polyline points="17.19,35.28 16.95,36.37 16.26,37.30 15.22,37.91 14.00,38.13 12.78,37.91 11.74,37.30 11.05,36.37 10.81,35.28 11.05,34.19 11.74,33.26 12.78,32.65 14.00,32.43 15.22,32.65 16.26,33.26 16.95,34.19 17.19,35.28"/>
+      <polyline points="68.72,30.15 71.57,27.87 71.57,38.13"/>
+      <polyline points="93.19,30.72 92.95,31.81 92.26,32.74 91.22,33.35 90.00,33.57 88.78,33.35 87.74,32.74 87.05,31.81 86.81,30.72 87.05,29.63 87.74,28.70 88.78,28.09 90.00,27.87 91.22,28.09 92.26,28.70 92.95,29.63 93.19,30.72"/>
+      <polyline points="93.19,30.72 91.37,38.13"/>
+      <polyline points="112.42,27.87 106.49,27.87 105.81,32.43 110.14,31.86 112.42,34.14 111.85,36.99 109.00,38.13 105.58,37.33"/>
+      <polyline points="36.19,49.72 35.95,50.81 35.26,51.74 34.22,52.35 33.00,52.57 31.78,52.35 30.74,51.74 30.05,50.81 29.81,49.72 30.05,48.63 30.74,47.70 31.78,47.09 33.00,46.87 34.22,47.09 35.26,47.70 35.95,48.63 36.19,49.72"/>
+      <polyline points="36.19,49.72 34.37,57.13"/>
+      <polyline points="54.51,49.38 54.32,50.34 53.77,51.16 52.96,51.69 52.00,51.88 51.04,51.69 50.23,51.16 49.68,50.34 49.49,49.38 49.68,48.42 50.23,47.61 51.04,47.06 52.00,46.87 52.96,47.06 53.77,47.61 54.32,48.42 54.51,49.38"/>
+      <polyline points="55.08,54.40 54.84,55.44 54.17,56.33 53.18,56.92 52.00,57.13 50.82,56.92 49.83,56.33 49.16,55.44 48.92,54.40 49.16,53.35 49.83,52.46 50.82,51.86 52.00,51.66 53.18,51.86 54.17,52.46 54.84,53.35 55.08,54.40"/>
+      <polyline points="149.51,46.87 145.63,49.72 143.81,53.71"/>
+      <polyline points="150.19,54.28 149.94,55.37 149.26,56.30 148.22,56.91 147.00,57.13 145.78,56.91 144.74,56.30 144.06,55.37 143.81,54.28 144.06,53.19 144.74,52.26 145.78,51.65 147.00,51.43 148.22,51.65 149.26,52.26 149.94,53.19 150.19,54.28"/>
+      <polyline points="16.51,68.38 16.32,69.34 15.77,70.16 14.96,70.69 14.00,70.88 13.04,70.69 12.23,70.16 11.68,69.34 11.49,68.38 11.68,67.42 12.23,66.61 13.04,66.06 14.00,65.87 14.96,66.06 15.77,66.61 16.32,67.42 16.51,68.38"/>
+      <polyline points="17.08,73.40 16.84,74.44 16.17,75.33 15.18,75.92 14.00,76.13 12.82,75.92 11.83,75.33 11.16,74.44 10.92,73.40 11.16,72.35 11.83,71.46 12.82,70.86 14.00,70.66 15.18,70.86 16.17,71.46 16.84,72.35 17.08,73.40"/>
+      <polyline points="92.51,65.87 88.63,68.72 86.81,72.71"/>
+      <polyline points="93.19,73.28 92.95,74.37 92.26,75.30 91.22,75.91 90.00,76.13 88.78,75.91 87.74,75.30 87.05,74.37 86.81,73.28 87.05,72.19 87.74,71.26 88.78,70.65 90.00,70.43 91.22,70.65 92.26,71.26 92.95,72.19 93.19,73.28"/>
+      <polyline points="162.58,66.21 169.42,66.21 165.43,70.09 168.51,71.23 169.42,73.85 167.14,76.13 162.58,75.56"/>
+      <polyline points="15.71,95.13 15.71,84.87 10.01,92.05 18.56,92.05"/>
+      <polyline points="73.51,87.38 73.32,88.34 72.77,89.16 71.96,89.69 71.00,89.88 70.04,89.69 69.23,89.16 68.68,88.34 68.49,87.38 68.68,86.42 69.23,85.61 70.04,85.06 71.00,84.87 71.96,85.06 72.77,85.61 73.32,86.42 73.51,87.38"/>
+      <polyline points="74.08,92.40 73.84,93.44 73.17,94.33 72.18,94.92 71.00,95.13 69.82,94.92 68.83,94.33 68.16,93.44 67.92,92.40 68.16,91.35 68.83,90.46 69.82,89.86 71.00,89.66 72.18,89.86 73.17,90.46 73.84,91.35 74.08,92.40"/>
+      <polyline points="105.58,85.21 112.42,85.21 108.43,89.09 111.51,90.23 112.42,92.85 110.14,95.13 105.58,94.56"/>
+      <polyline points="163.72,87.15 166.57,84.87 166.57,95.13"/>
+      <polyline points="10.01,103.87 17.99,103.87 12.86,114.13"/>
+      <polyline points="86.58,106.15 88.29,104.10 91.71,104.10 93.42,106.15 92.85,108.43 86.58,114.13 93.99,114.13"/>
+      <polyline points="168.51,103.87 164.63,106.72 162.81,110.71"/>
+      <polyline points="169.19,111.28 168.94,112.37 168.26,113.30 167.22,113.91 166.00,114.13 164.78,113.91 163.74,113.30 163.06,112.37 162.81,111.28 163.06,110.19 163.74,109.26 164.78,108.65 166.00,108.43 167.22,108.65 168.26,109.26 168.94,110.19 169.19,111.28"/>
+      <polyline points="35.51,122.87 31.63,125.72 29.81,129.71"/>
+      <polyline points="36.19,130.28 35.95,131.37 35.26,132.30 34.22,132.91 33.00,133.13 31.78,132.91 30.74,132.30 30.05,131.37 29.81,130.28 30.05,129.19 30.74,128.26 31.78,127.65 33.00,127.43 34.22,127.65 35.26,128.26 35.95,129.19 36.19,130.28"/>
+      <polyline points="124.58,125.15 126.29,123.10 129.71,123.10 131.42,125.15 130.85,127.43 124.58,133.13 131.99,133.13"/>
+      <polyline points="149.51,125.38 149.32,126.34 148.77,127.16 147.96,127.69 147.00,127.88 146.04,127.69 145.23,127.16 144.68,126.34 144.49,125.38 144.68,124.42 145.23,123.61 146.04,123.06 147.00,122.87 147.96,123.06 148.77,123.61 149.32,124.42 149.51,125.38"/>
+      <polyline points="150.08,130.40 149.84,131.44 149.17,132.33 148.18,132.92 147.00,133.13 145.82,132.92 144.83,132.33 144.16,131.44 143.92,130.40 144.16,129.35 144.83,128.46 145.82,127.86 147.00,127.66 148.18,127.86 149.17,128.46 149.84,129.35 150.08,130.40"/>
+      <polyline points="72.71,152.13 72.71,141.87 67.01,149.05 75.56,149.05"/>
+      <polyline points="87.72,144.15 90.57,141.87 90.57,152.13"/>
+      <polyline points="112.19,144.72 111.95,145.81 111.26,146.74 110.22,147.35 109.00,147.57 107.78,147.35 106.74,146.74 106.05,145.81 105.81,144.72 106.05,143.63 106.74,142.70 107.78,142.09 109.00,141.87 110.22,142.09 111.26,142.70 111.95,143.63 112.19,144.72"/>
+      <polyline points="112.19,144.72 110.37,152.13"/>
+      <polyline points="169.42,141.87 163.49,141.87 162.81,146.43 167.14,145.86 169.42,148.14 168.85,150.99 166.00,152.13 162.58,151.33"/>
+      <polyline points="92.51,163.38 92.32,164.34 91.77,165.16 90.96,165.69 90.00,165.88 89.04,165.69 88.23,165.16 87.68,164.34 87.49,163.38 87.68,162.42 88.23,161.61 89.04,161.06 90.00,160.87 90.96,161.06 91.77,161.61 92.32,162.42 92.51,163.38"/>
+      <polyline points="93.08,168.40 92.84,169.44 92.17,170.33 91.18,170.92 90.00,171.13 88.82,170.92 87.83,170.33 87.16,169.44 86.92,168.40 87.16,167.35 87.83,166.46 88.82,165.86 90.00,165.66 91.18,165.86 92.17,166.46 92.84,167.35 93.08,168.40"/>
+      <polyline points="143.01,160.87 150.99,160.87 145.86,171.13"/>
+      <polyline points="169.19,163.72 168.94,164.81 168.26,165.74 167.22,166.35 166.00,166.57 164.78,166.35 163.74,165.74 163.06,164.81 162.81,163.72 163.06,162.63 163.74,161.70 164.78,161.09 166.00,160.87 167.22,161.09 168.26,161.70 168.94,162.63 169.19,163.72"/>
+      <polyline points="169.19,163.72 167.37,171.13"/>
+    </svg>
+<svg class="board" style="left:42.5mm;top:157mm;width:125mm;height:125mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="23.50" y1="4.50" x2="23.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="23.50" x2="175.50" y2="23.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="42.50" y1="4.50" x2="42.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="42.50" x2="175.50" y2="42.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="80.50" y1="4.50" x2="80.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="80.50" x2="175.50" y2="80.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="99.50" y1="4.50" x2="99.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="99.50" x2="175.50" y2="99.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.8"/>
+      <line x1="137.50" y1="4.50" x2="137.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="137.50" x2="175.50" y2="137.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="156.50" y1="4.50" x2="156.50" y2="175.50" stroke="#000" stroke-width="0.5"/>
+      <line x1="4.50" y1="156.50" x2="175.50" y2="156.50" stroke="#000" stroke-width="0.5"/>
+    </svg>
+    <p class="foot">Point the camera at one board: keep its whole black frame in the picture. Sheet flat, good light, no dark shade.</p>
+  </section>
+  <section class="page">
+    <h1>Tic-Tac-Toe</h1>
+    <p>Open board-vision with #tictactoe. Play with a thick dark pen: big X and O, one per cell. X starts.</p>
+<svg class="board" style="left:20mm;top:22mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+<svg class="board" style="left:110mm;top:22mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+<svg class="board" style="left:20mm;top:112mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+<svg class="board" style="left:110mm;top:112mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+<svg class="board" style="left:20mm;top:202mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+<svg class="board" style="left:110mm;top:202mm;width:80mm;height:80mm" viewBox="0 0 180 180" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.25" y="2.25" width="175.5" height="175.5" fill="none" stroke="#000" stroke-width="4.5" stroke-linejoin="miter"/>
+      <line x1="61.50" y1="4.50" x2="61.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="61.50" x2="175.50" y2="61.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="118.50" y1="4.50" x2="118.50" y2="175.50" stroke="#000" stroke-width="1.5"/>
+      <line x1="4.50" y1="118.50" x2="175.50" y2="118.50" stroke="#000" stroke-width="1.5"/>
+    </svg>
+    <p class="foot">Point the camera at one board: keep its whole black frame in the picture. Sheet flat, good light, no dark shade.</p>
+  </section>
+</body>
+</html>

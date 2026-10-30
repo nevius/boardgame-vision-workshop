@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>board-vision: demo launcher</title>
+  <meta name="description" content="Demo launcher: one tap per live demo, a pre-flight check, QR codes and a plan B list.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <link rel="stylesheet" href="../style.css">
+  <!-- Same import map as index.html (keep the versions equal), so Pre-flight fills the cache for the demos. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs",
+      "@techstark/opencv-js": "https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.12.0-release.1/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="launcher.js"></script>
+</head>
+<body class="plain">
+  <header>
+    <h1>board-vision: demos</h1>
+    <a href="../">Open the app</a>
+    <button id="reload" type="button">Reload</button>
+  </header>
+  <main class="launcher">
+    <h2>1. Pre-flight</h2>
+    <p>Loads OpenCV.js and both models into the cache, asks for the camera and keeps the screen on.</p>
+    <button id="preflight" type="button" class="big">Pre-flight</button>
+    <p id="where"></p>
+    <p id="install"></p>
+    <p id="summary"></p>
+    <ul id="checks" class="checks"></ul>
+    <h2>2. Demos</h2>
+    <div id="demos" class="demos"></div>
+    <h2>Scan</h2>
+    <p>Show these on the projector or hold up the laptop: each one opens the page on a phone.</p>
+    <div class="qrs">
+      <figure><img src="qr/launcher.svg" alt="QR code: this launcher">This launcher</figure>
+      <figure><img src="qr/demo.svg" alt="QR code: the finished Ubongo demo">Demo (finished Ubongo)</figure>
+      <figure><img src="qr/repo.svg" alt="QR code: the workshop repo on GitHub">Workshop repo</figure>
+      <figure><img src="qr/print.svg" alt="QR code: the print sheets">Print sheets</figure>
+    </div>
+    <h2>Plan B</h2>
+    <ul id="plan-b" class="plan-b">
+      <li><b>No Wi-Fi:</b> phone hotspot, or the laptop alone: <code>pnpm dev</code> and its webcam. Run Pre-flight while you still have a connection: the libraries then come from the cache.</li>
+      <li><b>No camera:</b> the replay photos: the "backup" demos above, or More → <b>Sample photos</b> in the app. <code>node replay/run.js &lt;game&gt;</code> needs no browser at all.</li>
+      <li><b>Pages not live yet:</b> show the owner demo, <a href="https://jannistriestocode.github.io/board-vision/">https://jannistriestocode.github.io/board-vision/</a>; meanwhile on the laptop <code>pnpm dev</code>. Pages: repo → Settings → Pages → Source: GitHub Actions, then push.</li>
+      <li><b>Phone too slow:</b> the laptop with <code>pnpm dev</code> and its webcam, or the replay photos on the owner demo (the "backup" demos above).</li>
+    </ul>
+    <h2>Links</h2>
+    <div class="demos">
+      <a class="demo" href="slides.html"><strong>Slides</strong><span>The talk</span></a>
+      <a class="demo" href="../print.html"><strong>Print sheets</strong><span>A4 paper games</span></a>
+      <a class="demo" href="../check.html"><strong>Device check</strong><span>For the participants</span></a>
+      <a class="demo" href="../links.html"><strong>All pages</strong><span>Every page and link, sorted</span></a>
+    </div>
+  </main>
+</body>
+</html>

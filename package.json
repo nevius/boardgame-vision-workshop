@@ -1,0 +1,36 @@
+{
+  "name": "board-vision",
+  "private": true,
+  "type": "module",
+  "description": "Dev tools only. The page itself needs no install: it loads its libraries from a CDN (import map in index.html).",
+  "scripts": {
+    "dev": "concurrently --kill-others --names css,web \"pnpm:css:watch\" \"pnpm:serve\"",
+    "serve": "node scripts/dev-server.js",
+    "css": "tailwindcss --input tailwind.css --output style.css",
+    "css:watch": "tailwindcss --input tailwind.css --output style.css --watch",
+    "css:check": "pnpm run --silent css && git diff --exit-code --stat style.css",
+    "syntax": "find . -name '*.js' -not -path './node_modules/*' -exec sh -c 'for f; do node --check \"$f\" || exit 1; done' sh {} +",
+    "typecheck": "tsc --project tsconfig.json",
+    "unit": "node tests/run.js",
+    "audit": "pnpm audit --audit-level=moderate",
+    "test": "pnpm run unit && pnpm run syntax && pnpm run typecheck && pnpm run css:check && pnpm run audit",
+    "learn": "node scripts/learn.js",
+    "replay": "node replay/run.js"
+  },
+  "devDependencies": {
+    "@mediapipe/tasks-vision": "1.1.1",
+    "@tailwindcss/cli": "4.3.3",
+    "@techstark/opencv-js": "4.12.0-release.1",
+    "@types/node": "22.20.5",
+    "@web/dev-server": "1.0.0",
+    "axe-core": "4.14.0",
+    "concurrently": "10.0.6",
+    "htm": "3.1.1",
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0",
+    "preact": "10.29.8",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@10.34.6"
+}

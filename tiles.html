@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>board-vision: tiles and references</title>
+  <meta name="description" content="Debug: cut a board into tiles and compare them with the reference images.">
+  <!-- Installable app (issue #151): manifest, icons, full screen from the home screen. -->
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="board-vision">
+  <link rel="stylesheet" href="style.css">
+  <!-- Same import map as index.html (keep the versions equal). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/vision_bundle.mjs",
+      "@techstark/opencv-js": "https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.12.0-release.1/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="tiles-debug.js"></script>
+</head>
+<body class="plain">
+  <header>
+    <h1>Tiles and references</h1>
+    <a href="./">Open the app</a>
+  </header>
+  <main>
+    <div class="controls">
+      <label>Reference set <input id="set-name" value="default" size="10"></label>
+      <label>Look for
+        <select id="mode">
+          <option value="board">a board (grid)</option>
+          <option value="cards">many cards</option>
+          <option value="picture">whole picture (grid)</option>
+        </select>
+      </label>
+      <label>Rows <input id="rows" type="number" min="1" max="30" value="3" size="3"></label>
+      <label>Cols <input id="cols" type="number" min="1" max="30" value="3" size="3"></label>
+      <label>Margin <input id="margin" type="number" min="0" max="0.4" step="0.05" value="0.05" size="4"></label>
+    </div>
+    <div class="controls">
+      <button id="camera-button" type="button">Start camera</button>
+      <label class="button">Load photo <input id="photo-input" type="file" accept="image/*" hidden></label>
+      <button id="selftest-button" type="button">Self-test</button>
+    </div>
+    <p id="status">Load a photo or start the camera. Then tap a tile to name it.</p>
+    <p id="backend">Embedder: not loaded yet.</p>
+    <video id="camera" muted playsinline></video>
+    <canvas id="view" width="640" height="480"></canvas>
+    <h2>Tiles <small>(tap one to give it a name)</small></h2>
+    <div id="tiles" class="tiles"></div>
+    <h2>References</h2>
+    <p id="ref-summary"></p>
+    <div id="refs" class="tiles"></div>
+    <div class="controls">
+      <button id="undo-button" type="button">Remove last</button>
+      <button id="clear-button" type="button">Remove all</button>
+      <button id="export-button" type="button">Export JSON</button>
+      <label class="button">Import JSON <input id="import-input" type="file" accept=".json,application/json" hidden></label>
+    </div>
+  </main>
+</body>
+</html>

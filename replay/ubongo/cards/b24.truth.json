@@ -1,0 +1,17 @@
+{
+ "type":"B",
+ "print":".#..,.##.,####,#.#.|#...,####,###.,#...",
+ "grid":[".#..",".##.","####","#.#."],
+ "pieces":{
+  "1":["blue3","green2","red2","red3"],
+  "2":["blue1","green2","red4","yellow4"],
+  "3":["blue2","blue3","red4","yellow2"],
+  "4":["green2","green4","red2","yellow4"],
+  "5":["green1","green2","yellow1","yellow4"],
+  "6":["green2","red3","red4","yellow2"],
+  "7":["blue2","blue4","green1","red2"],
+  "8":["blue4","green2","red2","red3"],
+  "9":["blue3","green2","red3","yellow1"],
+  "10":["green2","green4","red3","red4"]
+ }
+}

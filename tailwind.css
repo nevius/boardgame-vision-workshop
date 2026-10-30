@@ -1,0 +1,127 @@
+/* Tailwind source. The page loads style.css, which is built from this file:
+     pnpm css         (once)       pnpm dev         (rebuilds on every change)
+   Commit style.css together with your change; pnpm test fails when it is stale.
+   Rule: write Tailwind classes out in full ("bg-sky-600"), never glue them from pieces
+   ("bg-" + color). The CLI only finds classes that appear as whole words in the files. */
+@import "tailwindcss";
+@import "./ui/tokens.css";
+/* Photos, truth files and their scripts hold no page classes (words like "blur" there are not classes). */
+@source not "./replay";
+/* The workshop slides carry their own styles; their words ("transition", "transform") are not page classes. */
+@source not "./workshop";
+/* Docs, the finished games and the export folder hold no page classes ("static", "ring" there are words, not
+   classes). The participant repo has no solutions/ on main, so its style.css must not depend on them. */
+@source not "./**/*.md";
+@source not "./solutions";
+@source not "./export";
+/* The accessibility check is an owner tool, not in the participant repo; its words ("filter") are not classes. */
+@source not "./scripts/a11y.js";
+@source not "./tests/a11y.test.js";
+
+/* The tokens (ui/tokens.css) as Tailwind names: bg-accent, text-ok, bg-surface, border-line, rounded-ui, min-h-tap. */
+@theme inline {
+  --color-accent: var(--bv-accent);
+  --color-accent-strong: var(--bv-accent-strong);
+  --color-accent-text: var(--bv-accent-text);
+  --color-ok: var(--bv-ok);
+  --color-warn: var(--bv-warn);
+  --color-error: var(--bv-error);
+  --color-surface: var(--bv-surface);
+  --color-surface-2: var(--bv-surface-2);
+  --color-line: var(--bv-line);
+  --radius-ui: var(--bv-radius);
+  --spacing-tap: var(--bv-tap);
+}
+
+@theme {
+  /* The busy indicator (ui/Busy.js) fades in; a job with a delay sets animation-delay, so fast steps never show. */
+  --animate-busy-in: busy-in 150ms ease-out both;
+  @keyframes busy-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* Dark everywhere, also for form controls and scrollbars. */
+@layer base {
+  :root { color-scheme: dark; }
+}
+
+/* The device check and the debug pages (check.html, tiles.html, warp.html) use plain HTML
+   with <body class="plain">. These are their styles. */
+@layer components {
+  body.plain {margin: 0; font-family: system-ui, sans-serif; background: var(--bv-bg); color: var(--bv-text);}
+  .plain header {display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; justify-content: space-between; padding: .5rem 1rem; background: var(--bv-surface);}
+  /* Phone width (issue #147): the title takes the first line, the links wrap below it, never off the edge. */
+  .plain header h1 {flex: 1 1 12rem;}
+  .plain header a {white-space: nowrap; display: inline-flex; align-items: center; min-height: var(--bv-tap);} /* a tap target (issue #154) */
+  .plain main {min-width: 0; overflow-wrap: anywhere;}
+  .plain h1 {font-size: var(--bv-text-lg); margin: 0;}
+  .plain select {font-size: 1rem; padding: .3rem;}
+  .plain main {padding: 1rem;}
+  .plain canvas {width: 100%; max-width: 640px; background: var(--bv-bg); display: block;}
+  .plain pre {white-space: pre-wrap; font-size: var(--bv-text-sm);}
+  .plain .controls {display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .5rem;}
+  .plain button, .plain .button {font: inherit; font-size: 1rem; padding: .5rem .8rem; border-radius: var(--bv-radius); border: 1px solid var(--bv-line);
+  background: var(--bv-surface-2); color: var(--bv-text); cursor: pointer; min-height: var(--bv-tap);}
+  .plain button:disabled {opacity: .4; cursor: default;}
+  .plain #camera {position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;}
+  .plain main.dragging {outline: 3px dashed var(--bv-accent-text); outline-offset: -6px;}
+  .plain a {color: var(--bv-accent-text);}
+  .plain p a, .plain li a {text-decoration: underline;} /* links inside text: not by colour alone (WCAG 1.4.1) */
+  .plain .checks {list-style: none; padding: 0;}
+  .plain .checks li {padding: .5rem .7rem; margin: .3rem 0; border-radius: var(--bv-radius); background: var(--bv-surface);}
+  .plain .checks li.good {border-left: 6px solid var(--bv-ok);}
+  .plain .checks li.bad {border-left: 6px solid var(--bv-error);}
+  .plain .checks li.wait {border-left: 6px solid var(--bv-muted);}
+  .plain .checks .fix {margin-top: .3rem; font-weight: bold;}
+  /* Pre-flight download rows (ui/download-rows.js, issue #162): a thin bar; size unknown = a part slides to and fro. */
+  .plain .checks .bar {display: block; height: .25rem; margin-top: .3rem; border-radius: 9999px; background: var(--bv-surface-2); overflow: hidden;}
+  .plain .checks .bar > span {display: block; height: 100%; width: 0; background: var(--bv-accent); transition: width .25s linear;}
+  .plain .checks .bar.moving > span {width: 30%; animation: bv-slide 1.2s ease-in-out infinite alternate;}
+  .plain .checks li.good .bar > span {background: var(--bv-ok);}
+  @keyframes bv-slide {from {margin-left: 0;} to {margin-left: 70%;}}
+  @media (prefers-reduced-motion: reduce) {.plain .checks .bar.moving > span {animation: none; width: 100%; opacity: .5;}}
+  .plain .checks ol.fix {padding-left: 1.3rem; list-style: decimal;}
+  .plain .checks ol.fix li {padding: .1rem 0; margin: 0; background: none;}
+  .plain .help-actions {display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem;}
+  .plain .help-actions .button {display: inline-flex; align-items: center; text-decoration: none;}
+  .plain #summary.good {color: var(--bv-ok);}
+  .plain #summary.bad {color: var(--bv-error-text);}
+  .plain .straight {display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem;}
+  .plain .straight canvas {width: auto; max-width: 45%;}
+  .plain .tiles {display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0;}
+  .plain .tile {display: flex; flex-direction: column; align-items: center; background: var(--bv-surface); border-radius: var(--bv-radius);
+  padding: .3rem; font: inherit; font-size: var(--bv-text-sm); color: var(--bv-text); border: 1px solid var(--bv-line);}
+  .plain .tile canvas, .plain .tile img {width: 72px; height: 72px; object-fit: contain;}
+  .plain .tile.wrong {border-color: var(--bv-error);}
+  .plain input {font: inherit; font-size: 1rem;}
+  .plain h2 {font-size: var(--bv-text-md);}
+  /* Tailwind resets margins and bold headings; bring the plain defaults back. */
+  .plain p, .plain ul, .plain pre {margin: 1em 0;}
+  .plain h1, .plain h2 {font-weight: bold;}
+  .plain h2 {margin: .8em 0;}
+  /* The demo launcher (workshop/index.html): big touch buttons, phone first. */
+  .plain .launcher {max-width: 32rem; margin: 0 auto;}
+  .plain button.big {width: 100%; min-height: var(--bv-tap); font-size: var(--bv-text-lg); font-weight: bold; background: var(--bv-accent); border-color: var(--bv-accent); color: var(--bv-text);}
+  .plain .demos {display: grid; gap: .6rem;}
+  .plain a.demo {display: flex; flex-direction: column; justify-content: center; min-height: var(--bv-tap); padding: .5rem 1rem;
+  border-radius: var(--bv-radius); background: var(--bv-surface); border: 1px solid var(--bv-line); color: var(--bv-text); text-decoration: none;}
+  .plain a.demo strong {font-size: var(--bv-text-lg);}
+  /* Launcher: the QR codes (workshop/qr/, issue #150) two per row, and the plan B list. */
+  .plain .qrs {display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem;}
+  .plain .qrs figure {margin: 0; text-align: center; font-size: var(--bv-text-sm); color: var(--bv-muted);}
+  .plain .qrs img {display: block; width: 100%; max-width: 10rem; margin: 0 auto .3rem; border-radius: var(--bv-radius);}
+  .plain .plan-b li {margin: .4rem 0;}
+  .plain a.demo span {font-size: var(--bv-text-md); color: var(--bv-muted);}
+  /* The "All pages" page (links.html): the exact path under each name, the modes of a game, the GitHub part. */
+  .plain a.demo code, .plain .modes code {font-family: ui-monospace, monospace; font-size: var(--bv-text-sm); color: var(--bv-muted);}
+  .plain .tag {font-style: normal; font-weight: normal; font-size: var(--bv-text-sm); padding: 0 .4rem; border-radius: 999px;
+  border: 1px solid var(--bv-line); color: var(--bv-muted);}
+  .plain .modes {display: flex; flex-wrap: wrap; gap: .4rem; margin: -.2rem 0 .4rem 1rem;}
+  .plain .modes a {display: flex; flex-direction: column; justify-content: center; min-height: var(--bv-tap); padding: .2rem .6rem;
+  border-radius: var(--bv-radius); background: var(--bv-surface-2); color: var(--bv-text); text-decoration: none; font-size: var(--bv-text-md);}
+  .plain .note {color: var(--bv-muted); font-size: var(--bv-text-md); margin-top: -.4rem;}
+  .plain details.github {margin-top: 2rem; border-top: 1px solid var(--bv-line); padding-top: 1rem;}
+  .plain details.github summary {min-height: var(--bv-tap); display: flex; flex-wrap: wrap; align-items: center; gap: 0 .6rem;
+  font-size: var(--bv-text-lg); font-weight: bold; cursor: pointer;}
+  .plain details.github summary span {font-size: var(--bv-text-sm); font-weight: normal; color: var(--bv-muted);}
+  .plain details.github a.demo {border-style: dashed;}
+}
