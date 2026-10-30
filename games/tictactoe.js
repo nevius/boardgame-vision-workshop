@@ -114,7 +114,49 @@ if (inkRatio > 0.2) {
  * @returns {TicTacToeMove}
  */
 export function solve(state) {
-  return {row: 1, col: 1, player: 'X'};
+  const cells = state.cells;
+  if (cells.length !== 3 || cells.some((row) => row.some((mark) => mark === null))) return null; // not read yet
+  if (winner(cells) || cells.every((row) => row.every((mark) => mark !== ''))) return null; // game over
+  const count = (/** @type {string} */ mark) => cells.flat().filter((m) => m === mark).length;
+  const player = count('X') === count('O') ? 'X' : 'O'; // X starts
+  const best = minimax(cells.map((row) => [...row]), player);
+  return best.move && { ...best.move, player };
+}
+
+// The 8 lines: 3 rows, 3 columns, 2 diagonals, as [row, col] pairs.
+const LINES = [0, 1, 2].flatMap((i) => [
+  [[i, 0], [i, 1], [i, 2]],
+  [[0, i], [1, i], [2, i]],
+]).concat([[[0, 0], [1, 1], [2, 2]], [[0, 2], [1, 1], [2, 0]]]);
+
+// 'X' or 'O' when that player has three in a line, else ''.
+/** @param {(string | null)[][]} cells */
+function winner(cells) {
+  for (const [a, b, c] of LINES) {
+    const mark = cells[a[0]][a[1]];
+    if (mark && mark === cells[b[0]][b[1]] && mark === cells[c[0]][c[1]]) return mark;
+  }
+  return '';
+}
+
+// Tries every empty cell; score +1 = player wins, 0 = draw, -1 = player loses (both play their best).
+/**
+ * @param {(string | null)[][]} cells
+ * @param {string} player
+ * @returns {{ score: number, move: { row: number, col: number } | null }}
+ */
+function minimax(cells, player) {
+  const other = player === 'X' ? 'O' : 'X';
+  let best = { score: -2, move: null };
+  for (let row = 0; row < 3; row++) for (let col = 0; col < 3; col++) {
+    if (cells[row][col] !== '') continue;
+    cells[row][col] = player;
+    const score = winner(cells) === player ? 1 : -minimax(cells, other).score;
+    cells[row][col] = '';
+    if (score > best.score) best = { score, move: { row, col } };
+  }
+  if (!best.move) return { score: 0, move: null }; // board full: draw
+  return best;
 }
 
 // Draws the cut grid (cyan), each read mark small ('?' = not read) and the suggested move big (yellow).
